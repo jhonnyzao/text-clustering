@@ -14,13 +14,19 @@ def inicializa_centroides(dados, total_k):
 
 	return centroides
 
+
 def distancia_euclidiana(centroide, dado):
 	total = 0
-	for index, cent in enumerate(centroide):
-		total += (int(cent[i]) - int(dado[][i]))**2
 
-	total = total^0.5
+	valores_centroides = centroide
+	valores_dado = dado
+
+	for indice, c in valores_centroides.items():
+		total += (int(c) - int(valores_dado[indice]))**2
+
+	total = total**0.5
 	return total
+
 
 with open('textos.csv') as arquivo:
 	leitor = csv.reader(arquivo, delimiter=',')
@@ -34,8 +40,9 @@ with open('textos.csv') as arquivo:
 centroides = inicializa_centroides(dados, total_k)
 
 resultado = defaultdict(dict)
-for centroide in centroides.items():
-	for dado in dados.items():
+for i, centroide in centroides.items():
+	for j, dado in dados.items():
 		resultado[i][j] = distancia_euclidiana(centroide, dado)
 
-print(resultado)
+for sheila, clarice in resultado.items():
+	
