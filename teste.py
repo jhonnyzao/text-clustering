@@ -39,10 +39,16 @@ with open('textos.csv') as arquivo:
 
 centroides = inicializa_centroides(dados, total_k)
 
-resultado = defaultdict(dict)
+matriz_distancias = defaultdict(dict)
 for i, centroide in centroides.items():
 	for j, dado in dados.items():
-		resultado[i][j] = distancia_euclidiana(centroide, dado)
+		matriz_distancias[i][j] = distancia_euclidiana(centroide, dado)
 
-for sheila, clarice in resultado.items():
-	
+grupos = defaultdict(dict)
+for i, documento in matriz_distancias[0].items():
+	aux = list()
+	for j, centroide in matriz_distancias.items():
+		aux.append(centroide[i])
+	grupos[i] = aux.index(min(aux))
+
+print(matriz_distancias, grupos)
