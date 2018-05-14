@@ -3,6 +3,7 @@ from collections import defaultdict
 import math
 import numpy
 from copy import copy
+from random import randint
 
 iteracoes_maximas = 1000
 convergencia = 0.01
@@ -10,9 +11,26 @@ total_k = 3
 
 def inicializa_centroides(dados, total_k):
 	centroides = defaultdict(dict)
-	centroides[0] = {0: '2', 1: '1', 2: '2', 3: '1', 4: '1'}
-	centroides[1] = {0: '3', 1: '1', 2: '0', 3: '0', 4: '0'}
-	centroides[2] = {0: '2', 1: '0', 2: '1', 3: '2', 4: '1'}
+	valores_maximos = list()
+	valores_minimos = list()
+	
+	for linha in dados.values():
+		valores_maximos.append(max(linha.values()))
+		valores_minimos.append(min(linha.values()))
+
+	valor_maximo = max(valores_maximos)
+	valor_minimo = min(valores_minimos)
+	
+	for linha in range(0, total_k):
+		for coluna in range(0, len(dados[0])):
+			centroides[linha][coluna] = randint(int(valor_minimo), int(valor_maximo))
+
+	print(centroides)
+	exit()
+	
+	#centroides[0] = {0: '2', 1: '1', 2: '2', 3: '1', 4: '1'}
+	#centroides[1] = {0: '3', 1: '1', 2: '0', 3: '0', 4: '0'}
+	#centroides[2] = {0: '2', 1: '0', 2: '1', 3: '2', 4: '1'}
 
 	return centroides
 
