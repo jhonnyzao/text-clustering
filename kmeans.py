@@ -1,64 +1,132 @@
+# -*- encoding: utf-8 -*-
 import csv
+from collections import defaultdict
 import math
 import numpy
-import pandas
+from copy import copy
+from random import randint
+
+def inicializa_centroides_aleatoriamente(dados, total_k):
+	centroides = defaultdict(dict)
+	valores_maximos = list()
+	valores_minimos = list()
+
+	for linha in dados.values():
+		valores_maximos.append(max(linha.values()))
+		valores_minimos.append(min(linha.values()))
+
+	valor_maximo = max(valores_maximos)
+	valor_minimo = min(valores_minimos)
+
+	for linha in range(0, total_k):
+		for coluna in range(0, len(dados[0])):
+			centroides[linha][coluna] = randint(int(valor_minimo), int(valor_maximo))
+
+	#c = defaultdict(dict)
+
+	#c[0] = {0: '2', 1: '1', 2: '2', 3: '1', 4: '1'}
+	#c[1] = {0: '3', 1: '1', 2: '0', 3: '0', 4: '0'}
+	#c[2] = {0: '2', 1: '0', 2: '1', 3: '2', 4: '1'}
+
+	return centroides
+
+
+def distancia_euclidiana(centroide, dado):
+	total = 0
+
+	valores_centroides = centroide
+	valores_dado = dado
+
+	for indice, c in valores_centroides.items():
+		total += (int(c) - int(valores_dado[indice]))**2
+
+	total = total**0.5
+	total = round(total, 2)
+
+	return total
+
+
+def obtem_matriz_distancias(centroides, dados):
+	matriz_distancias = defaultdict(dict)
+	#dois loops aninhados para comparar a distancia de cada centroide com cada dado
+	for i, centroide in centroides.items():
+		for j, dado in dados.items():
+			matriz_distancias[i][j] = distancia_euclidiana(centroide, dado)
+
+	return matriz_distancias
+
+
+def obtem_formacao_dos_grupos(matriz_distancias):
+	#percorre cada coluna
+	for i, texto in matriz_distancias[0].items():
+		aux = list()
+		for j, centroide in matriz_distancias.items():
+			aux.append(centroide[i])
+		grupos[i] = aux.index(min(aux))
+
+	return grupos
+
+
+def reposiciona_centroides(centroides, grupos, dados):
+	for i, centroide in centroides.items():
+		indices_media = list()
+		#percorre o dict de grupos procurando todos os dados associados ao centroide i, que sao importantes para o calculo de sua nova posicao
+		for j, grupo in grupos.items():
+			if grupo == i:
+				#guarda os indices das posicoes que serao usadas pro calculo da media
+				indices_media.append(j)
+
+		for k, dimensao_centroide in centroide.items():
+			aux = list()
+			#percorre a matriz de dados pegando a posicao de todos os que estao na lista indices_media, ou seja, todos os dados associados ao centroide i
+			for indice_media in indices_media:
+				valor = dados[indice_media][k]
+				aux.append(int(valor))
+
+			#verificacao necessaria para nao quebrar o programa caso nao haja nenhum dado no grupo de algum centroide
+			if aux:
+				media = round(numpy.average(aux), 2)
+				centroide[k] = media
+
 
 iteracoes_maximas = 1000
-convergencia = 0.01
-k = 3
+total_k = 3
 
-with open('dados.csv') as arquivo:
+#le o csv e coloca a posicao dos dados no dict dados
+with open('textos.csv') as arquivo:
 	leitor = csv.reader(arquivo, delimiter=',')
-	for row in leitor:
-		print (row[0], row[1])
+	next(leitor)
 
-dado_a = numpy.array((xa ,ya, za))
-dado_b = numpy.array((xb, yb, zb))
+	dados = defaultdict(dict)
+	for i, row in enumerate(leitor):
+		for j, value in enumerate(row):
+			dados[i][j] = value
 
-def aproxima(dados):
-	centroides = {}
-	for i in range(k):
-		centroides[i] = dados[i]
+#eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
+centroides = inicializa_centroides_aleatoriamente(dados.copy(), total_k)
 
-	for i in range(iteracoes_maximas):
-		classes = {}
-		for i in range(k):
-			classes[i] = []
+grupos = defaultdict(dict)
+grupos_ultima_iteracao = defaultdict(dict)
+convergiu = False
+iteracao_atual = 0
 
-		for dado in dados:
-			distancias = [numpy.linalg.form(dados - centroides[centroide]) for centroide in centroides]
-			classificacao = distancias.index(min(distancias))
-			classes[classificacao].append(dados)
+#duas condicoes de parada
+while (iteracao_atual <= iteracoes_maximas or not convergiu):
+	matriz_distancias = obtem_matriz_distancias(centroides, dados)
 
-		anterior = dict(centroides)
+	#variavel que guarda ultimo estado de grupos para analise de convergencia
+	grupos_ultima_iteracao = grupos.copy()
 
-		for classificacao in classes:
-			centroides[classificacao] = numpy.average(classes[classificacao], axis = 0)
+	grupos = obtem_formacao_dos_grupos(matriz_distancias)
 
-		convergeu = True
-		
-		for centroide in centroides:
-			centroide_original = anterior[centroide]
-			atual = centroides[centroide]
+	#compara se algum dado mudou de centroide e assume convergencia em caso negativo
+	if grupos_ultima_iteracao == grupos:
+		convergiu = True
+		break
 
-			if numpy.sum((atual - centroide_original)/centroide_original * 100.0) > convergencia:
-				convergeu = False
+	print("%dª iteracao\n" % (iteracao_atual))
 
-		if convergeu:
-			break
+	reposiciona_centroides(centroides, grupos, dados)
 
-
-def pred(dados):
-	distancias = [numpy.linalg.norm(dados - centroides[centroide]) for centroide in centroides]
-	classificacao = distancias.index(min(distancias))
-
-	return classificacao
-
-
-dados = pandas.read_csv(r"dados.csv")
-dados = dados[['one', 'two']]
-dataset = dados.astype(float).values.tolist()
-
-x = df.values
-
-resultado = aproxima(x)
+	print(grupos)
+	iteracao_atual += 1
