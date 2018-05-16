@@ -1,70 +1,3 @@
-<<<<<<< HEAD
-import csv
-import math
-import numpy
-import pandas
-
-iteracoes_maximas = 1000
-convergencia = 0.01
-k = 3
-
-#with open('dados.csv') as arquivo:
-#    leitor = csv.reader(arquivo, delimiter=',')
-#    for row in leitor:
-#        print(row[0], row[1])
-
-#dado_a = numpy.array((xa, ya, za))
-#dado_b = numpy.array((xb, yb, zb))
-
-
-def aproxima(dados):
-    centroides = {}
-    for i in range(k):
-        centroides[i] = dados[i]
-
-    for i in range(iteracoes_maximas):
-        classes = {}
-        for i in range(k):
-            classes[i] = []
-
-        for dado in dados:
-            distancias = [numpy.linalg.norm(dados - centroides[centroide]) for centroide in centroides]
-            classificacao = distancias.index(min(distancias))
-            classes[classificacao].append(dados)
-
-        anterior = dict(centroides)
-
-        for classificacao in classes:
-            centroides[classificacao] = numpy.average(classes[classificacao], axis=0)
-
-        convergeu = True
-
-        for centroide in centroides:
-            centroide_original = anterior[centroide]
-            atual = centroides[centroide]
-
-            if numpy.sum((atual - centroide_original) / centroide_original * 100.0) > convergencia:
-                convergeu = False
-
-        if convergeu:
-            break
-
-
-def pred(dados):
-    distancias = [numpy.linalg.norm(dados - centroides[centroide]) for centroide in centroides]
-    classificacao = distancias.index(min(distancias))
-
-    return classificacao
-
-
-#dados = pandas.read_csv(r"dados.csv")
-#dados = dados[['one', 'two']]
-#dataset = dados.astype(float).values.tolist()
-
-#x = df.values
-
-#resultado = aproxima(x)
-=======
 # -*- encoding: utf-8 -*-
 import csv
 from collections import defaultdict
@@ -72,6 +5,7 @@ import math
 import numpy
 from copy import copy
 from random import randint
+import random
 
 def inicializa_centroides_aleatoriamente(dados, total_k):
 	centroides = defaultdict(dict)
@@ -89,11 +23,16 @@ def inicializa_centroides_aleatoriamente(dados, total_k):
 		for coluna in range(0, len(dados[0])):
 			centroides[linha][coluna] = randint(int(valor_minimo), int(valor_maximo))
 
-	#c = defaultdict(dict)
+	return centroides
 
-	#c[0] = {0: '2', 1: '1', 2: '2', 3: '1', 4: '1'}
-	#c[1] = {0: '3', 1: '1', 2: '0', 3: '0', 4: '0'}
-	#c[2] = {0: '2', 1: '0', 2: '1', 3: '2', 4: '1'}
+def inicializa_centroides_sobre_dados(dados, total_k):
+	#escolhe k dados distintos para inicializacao dos centroides sobre eles
+	dados_escolhidos = random.sample(range(1, len(dados)), total_k)
+
+	centroides = defaultdict(dict)
+	#popula cada centroide com uma copia dos dados sorteados
+	for i, posicao_dado in enumerate(dados_escolhidos):
+		centroides[i] = dados[posicao_dado].copy()
 
 	return centroides
 
@@ -170,7 +109,7 @@ with open('textos.csv') as arquivo:
 			dados[i][j] = value
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
-centroides = inicializa_centroides_aleatoriamente(dados.copy(), total_k)
+centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
 
 grupos = defaultdict(dict)
 grupos_ultima_iteracao = defaultdict(dict)
@@ -197,4 +136,3 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 
 	print(grupos)
 	iteracao_atual += 1
->>>>>>> e590a9ab7c396cc40aca4a87cf7f08510b0c03d1
