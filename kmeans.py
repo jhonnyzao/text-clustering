@@ -37,6 +37,61 @@ def inicializa_centroides_sobre_dados(dados, total_k):
 	return centroides
 
 
+def inicializa_k_means_mais_mais(dados, total_k):
+	centroides = defaultdict(dict)
+	dados_usados = list()
+
+	posicao_aleatoria = randint(0, int(len(dados))-1)
+	dado_aleatorio = dados[posicao_aleatoria]
+	
+	centroides[0] = dado_aleatorio
+	dados_usados.append(posicao_aleatoria)
+
+	for k in range(1, total_k):
+		distancias_quadradas = defaultdict(dict)
+		novo_centroide = -1
+
+		for j, dado in dados.items():
+			distancias = defaultdict(dict)
+			dados_proximos = 0
+
+			while (dados_proximos < k):
+				distancias[dados_proximos] = round(distancia_euclidiana(centroides[dados_proximos], dado), 2)
+				dados_proximos += 1
+
+			minima = min(distancias, key=distancias.get)
+			distancias_quadradas[j] = round(distancias[minima]**2, 2)
+
+		probabilidade = round(random.uniform(0,1), 2)
+		soma = 0
+		for distancia in distancias_quadradas:
+			soma += distancia
+		total = 0
+		ii = 0
+		sanitizador = 0
+
+		while (sanitizador < int(len(dados))*2):
+			total += distancias_quadradas[ii]/soma
+			total = round(total, 2)
+			if total >= probabilidade and ii not in dados_usados:
+				novo_centroide = ii
+				dados_usados.append(ii)
+				break
+			ii += 1
+			if ii >= int(len(distancias)):
+				ii = 0
+			sanitizador += 1
+
+		centroides[k] = dados[novo_centroide]
+
+	print(dados_usados)
+	print(centroides)
+	exit()
+	return centroides
+	
+
+
+
 def distancia_euclidiana(centroide, dado):
 	total = 0
 
@@ -109,7 +164,7 @@ with open('textos.csv') as arquivo:
 			dados[i][j] = value
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
-centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
+centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
 
 grupos = defaultdict(dict)
 grupos_ultima_iteracao = defaultdict(dict)
