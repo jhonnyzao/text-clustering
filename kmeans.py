@@ -39,57 +39,56 @@ def inicializa_centroides_sobre_dados(dados, total_k):
 
 def inicializa_k_means_mais_mais(dados, total_k):
 	centroides = defaultdict(dict)
-	dados_usados = list()
 
-	posicao_aleatoria = randint(0, int(len(dados))-1)
-	dado_aleatorio = dados[posicao_aleatoria]
-	
-	centroides[0] = dado_aleatorio
-	dados_usados.append(posicao_aleatoria)
+	if total_k < 1:
+		print('O número de centroides escolhidos precisa ser maior do que 0')
 
+	#posiciona o primeiro centroide sobre um dado aleatorio
+	centroides[0] = dados[randint(0, int(len(dados))-1)]
+
+	#partindo entao do segundo centroide ate o ultimo
 	for k in range(1, total_k):
-		distancias_quadradas = defaultdict(dict)
-		novo_centroide = -1
+		distancias = defaultdict(dict)
+		#monta uma matriz de distancias onde cada linha representa um dado
+		#com sua respectiva distancia do mais proximo dos centroides ja escolhidos
+		for x, dado in dados.items():
+			distancias_centroides_escolhidos = list()
+			for y, centroide in centroides.items():
+				distancias_centroides_escolhidos.append(round(distancia_euclidiana(centroide, dado), 2))
+			minimo = min(distancias_centroides_escolhidos)
+			#o algoritmo assume distancias elevadas ao quadrado
+			distancias[x] = round(minimo ** 2, 2)
 
-		for j, dado in dados.items():
-			distancias = defaultdict(dict)
-			dados_proximos = 0
+		#a soma das distancias eh usada para o calculo das probabilidades
+		soma_distancias = round(sum(distancias.values()), 2)
+		
+		#monta uma matriz de probabilidades, sendo elas calculadas pela distancia do dado pro centroide dividido pela soma das distancias
+		probabilidades = defaultdict(dict)
+		for i, distancia in distancias.items():
+			probabilidades[i] = round(distancia/soma_distancias, 2)
+		
+		aux = list()
+		for i, probabilidade in probabilidades.items():
+			aux.append(probabilidade)
+		
+		#calcula o cumulativo de cada probabilidade com as probabilidades anteriores
+		probabilidades_cumulativas = numpy.cumsum(aux)
 
-			while (dados_proximos < k):
-				distancias[dados_proximos] = round(distancia_euclidiana(centroides[dados_proximos], dado), 2)
-				dados_proximos += 1
-
-			minima = min(distancias, key=distancias.get)
-			distancias_quadradas[j] = round(distancias[minima]**2, 2)
-
-		probabilidade = round(random.uniform(0,1), 2)
-		soma = 0
-		for distancia in distancias_quadradas:
-			soma += distancia
-		total = 0
-		ii = 0
-		sanitizador = 0
-
-		while (sanitizador < int(len(dados))*2):
-			total += distancias_quadradas[ii]/soma
-			total = round(total, 2)
-			if total >= probabilidade and ii not in dados_usados:
-				novo_centroide = ii
-				dados_usados.append(ii)
+		#define valor aleatorio para comparar com a probabilidade
+		#o valor vai de 0 a 1.01 pois podem existir probabilidades cumulativas no valor de 1.01 devido aos arrendodamentos
+		aleatorio =  round(random.uniform(0,1.01), 2)
+		
+		#percorre cada valor do array de probabilidades acumuladas
+		for j, probabilidade in enumerate(probabilidades_cumulativas):
+			#o if abaixo compara o cumulativo de probabilidades com um numero aleatorio, a fim de tentar encontrar o dado
+			#mais longe dos centroides ja alocados
+			if aleatorio < probabilidade:
+				#o dado na posicao j pode ser o dado mais longe dos centroides ja alocados ou nao, mas o algoritmo
+				# garante que ele nao esta perto o suficiente para ser considerado uma boa posicao para inicializar um centroide
+				centroides[k] = dados[j]
 				break
-			ii += 1
-			if ii >= int(len(distancias)):
-				ii = 0
-			sanitizador += 1
 
-		centroides[k] = dados[novo_centroide]
-
-	print(dados_usados)
-	print(centroides)
-	exit()
 	return centroides
-	
-
 
 
 def distancia_euclidiana(centroide, dado):
