@@ -91,6 +91,36 @@ def inicializa_k_means_mais_mais(dados, total_k):
 	return centroides
 
 
+def indice_silhouette(dados, grupos):
+	silhouettes = defaultdict(dict)
+
+	valores_mesmo_cluster = list()
+	valores_cluster_diferente = list()
+
+	for i, dado in dados.items():
+		#variavel que guarda dado ja existente em outra variavel, mas facilita a leitura do codigo
+		grupo_atual = grupos[i]
+		#para cada dado, percorre toda a matriz que associa dado a centroide, e guarda as distancias euclidianas
+		#nas listas de valores do mesmo cluster ou de cluster diferente de acordo com o cenario
+		for j, grupo in grupos.items():
+			if grupo == grupo_atual:
+				valores_mesmo_cluster.append(distancia_euclidiana(dado, dados[j]))
+			else:
+				valores_cluster_diferente.append(distancia_euclidiana(dado, dados[j]))
+
+	#na literatura, b(i) eh o nome da variavel que guarda a distancia media dos dados em um
+	#centroide para todos os outros dados de centroides diferentes	
+	b = round(sum(valores_cluster_diferente)/len(valores_cluster_diferente), 2)
+
+	#na literatura, a(i) eh o nome da variavel que guarda a distancia media dos dados em um
+	#centroide para todos os demais dados no mesmo centroide
+	a = round(sum(valores_mesmo_cluster)/len(valores_mesmo_cluster), 2)
+
+	indice_silhouette = round((b - a)/max(a, b), 2)
+	print(indice_silhouette)
+	
+	exit()
+
 def distancia_euclidiana(centroide, dado):
 	total = 0
 
@@ -188,5 +218,7 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 
 	reposiciona_centroides(centroides, grupos, dados)
 
-	print(grupos)
 	iteracao_atual += 1
+
+print(grupos)
+indice_silhouette(dados, grupos)
