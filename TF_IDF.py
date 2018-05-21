@@ -1,5 +1,4 @@
 import numpy as np
-import math
 import string
 
 document_0 = "China has a strong economy that is growing at a rapid pace. However politically it differs greatly from the US Economy."
@@ -65,7 +64,7 @@ def tf_idf(corpus, dicionario):
     vetor_tfidf = set()
     #para cada termo do dicionario
     for termo in dicionario:
-        #calcula o idf do termo em todo o corpus é constante
+        #calcula o idf do termo em todo o corpus, é constante
         idf = idf(termo, corpus)
         for doc in corpus:
             #adiciona ao vetor_tf o tf para cada documento
@@ -73,7 +72,6 @@ def tf_idf(corpus, dicionario):
             vetor_tfidf.update(tf*idf)
 
     return vetor_tfidf
-
 #Provavelmente nem vamos usar esta função
 def tf_idf_vetor(termo, corpus):
     vetor_tfidf = set()
@@ -81,7 +79,26 @@ def tf_idf_vetor(termo, corpus):
         tf = tf(termo, doc)
         vetor_tfidf.update()
     return
-
+#Usa a binaria do jeito forca bruta
+def binaria(dicionario, corpus):
+    for doc in corpus:
+        bin_vetor_aux = [frequencia(termo, doc) for termo in dicionario]
+    bin_vetor = set()
+    for term in bin_vetor_aux:
+        if(bin_vetor_aux[term] > 0):
+            bin_vetor.update(1)
+        else:
+            bin_vetor.update(0)
+    return bin_vetor
+#cria o vetor binario usando uma funcao lambda que encapsula tudo que a
+#funcao acima faz, mas em uma linha (not sure if works)
+def binaria2(dicionario, corpus):
+    bin_vector = [(lambda termo: 1 if frequencia(termo,doc) > 0 else 0 for termo in dicionario)]
+    return bin_vector
+#outra funcao para a binaria para a construcao da matriz
+def binaria3(termo, doc):
+    bin_vector = [(lambda termo: 1 if frequencia(termo,doc) > 0 else 0 for termo in dicionario)]
+    return bin_vector
 #Executa a limpeza das pontuacoes
 limpeza()
 #cria o dicionario limpo
@@ -97,4 +114,12 @@ for doc in corpus:
 #Multiplica a matriz tf pelo vetor tfidf
 #Funciona pois o numero de colunas da matriz é igual ao numero de linhas
 matriz_tfidf = doc_tf_matriz.dot(vetor_tfidf)
+#Podemos remover o print da matriz depois
 print(matriz_tfidf)
+
+bin_matriz = []
+for doc in corpus:
+    bin_vet = [binaria3(termo, doc) for termo in dicionario]
+    bin_matriz.append(bin_vet)
+#podemos remover esse print também
+print(bin_matriz)
