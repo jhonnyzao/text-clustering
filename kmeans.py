@@ -191,7 +191,7 @@ with open('textos.csv') as arquivo:
 	dados = defaultdict(dict)
 	for i, row in enumerate(leitor):
 		for j, value in enumerate(row):
-			dados[i][j] = value
+			dados[i][j] = int(value)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
 centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
