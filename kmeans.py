@@ -104,7 +104,9 @@ def indice_silhouette(dados, grupos):
 		#nas listas de valores do mesmo cluster ou de cluster diferente de acordo com o cenario
 		for j, grupo in grupos.items():
 			if grupo == grupo_atual:
-				valores_mesmo_cluster.append(distancia_euclidiana(dado, dados[j]))
+				distancia = distancia_euclidiana(dado, dados[j])
+				if distancia != 0:
+					valores_mesmo_cluster.append(distancia)
 			else:
 				valores_cluster_diferente.append(distancia_euclidiana(dado, dados[j]))
 
@@ -119,7 +121,6 @@ def indice_silhouette(dados, grupos):
 	indice_silhouette = round((b - a)/max(a, b), 2)
 	print(indice_silhouette)
 	
-	exit()
 
 def distancia_euclidiana(centroide, dado):
 	total = 0
