@@ -6,6 +6,7 @@ import numpy
 from copy import copy
 from random import randint
 import random
+from sklearn import decomposition
 
 def inicializa_centroides_aleatoriamente(dados, total_k):
 	centroides = defaultdict(dict)
@@ -37,21 +38,21 @@ def inicializa_centroides_sobre_dados(dados, total_k):
 	return centroides
 
 
-def inicializa_k_means_mais_mais(dados, total_k):
+def inicializa_k_means_mais_mais(dados_copia, total_k):
 	centroides = defaultdict(dict)
 
 	if total_k < 1:
 		print('O número de centroides escolhidos precisa ser maior do que 0')
 
 	#posiciona o primeiro centroide sobre um dado aleatorio
-	centroides[0] = dados[randint(0, int(len(dados))-1)]
+	centroides[0] = dados_copia[randint(0, int(len(dados))-1)]
 
 	#partindo entao do segundo centroide ate o ultimo
 	for k in range(1, total_k):
 		distancias = defaultdict(dict)
 		#monta uma matriz de distancias onde cada linha representa um dado
 		#com sua respectiva distancia do mais proximo dos centroides ja escolhidos
-		for x, dado in dados.items():
+		for x, dado in dados_copia.items():
 			distancias_centroides_escolhidos = list()
 			for y, centroide in centroides.items():
 				distancias_centroides_escolhidos.append(round(distancia_euclidiana(centroide, dado), 2))
@@ -61,23 +62,23 @@ def inicializa_k_means_mais_mais(dados, total_k):
 
 		#a soma das distancias eh usada para o calculo das probabilidades
 		soma_distancias = round(sum(distancias.values()), 2)
-		
+
 		#monta uma matriz de probabilidades, sendo elas calculadas pela distancia do dado pro centroide dividido pela soma das distancias
 		probabilidades = defaultdict(dict)
 		for i, distancia in distancias.items():
 			probabilidades[i] = round(distancia/soma_distancias, 2)
-		
+
 		aux = list()
 		for i, probabilidade in probabilidades.items():
 			aux.append(probabilidade)
-		
+
 		#calcula o cumulativo de cada probabilidade com as probabilidades anteriores
 		probabilidades_cumulativas = numpy.cumsum(aux)
 
 		#define valor aleatorio para comparar com a probabilidade
 		#o valor vai de 0 a 1.01 pois podem existir probabilidades cumulativas no valor de 1.01 devido aos arrendodamentos
 		aleatorio =  round(random.uniform(0,1.01), 2)
-		
+
 		#percorre cada valor do array de probabilidades acumuladas
 		for j, probabilidade in enumerate(probabilidades_cumulativas):
 			#o if abaixo compara o cumulativo de probabilidades com um numero aleatorio, a fim de tentar encontrar o dado
@@ -85,7 +86,7 @@ def inicializa_k_means_mais_mais(dados, total_k):
 			if aleatorio < probabilidade:
 				#o dado na posicao j pode ser o dado mais longe dos centroides ja alocados ou nao, mas o algoritmo
 				# garante que ele nao esta perto o suficiente para ser considerado uma boa posicao para inicializar um centroide
-				centroides[k] = dados[j]
+				centroides[k] = dados_copia[j]
 				break
 
 	return centroides
@@ -163,7 +164,7 @@ with open('textos.csv') as arquivo:
 			dados[i][j] = value
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
-centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
+centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
 
 grupos = defaultdict(dict)
 grupos_ultima_iteracao = defaultdict(dict)
@@ -188,5 +189,5 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 
 	reposiciona_centroides(centroides, grupos, dados)
 
-	print(grupos)
 	iteracao_atual += 1
+
