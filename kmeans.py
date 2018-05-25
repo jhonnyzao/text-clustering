@@ -7,7 +7,7 @@ from copy import copy
 from random import randint
 import random
 from pre_processamento import *
-#from sklearn import decomposition
+from sklearn import decomposition
 
 def inicializa_centroides_aleatoriamente(dados, total_k):
 	dimensao = (total_k, len(dados[0]))
@@ -180,7 +180,6 @@ def reposiciona_centroides(centroides, grupos, dados):
 				media = round(np.average(aux), 2)
 				centroide[k] = media
 
-
 pp = PreProcessamento()
 
 tokens = pp.carrega_textos()
@@ -188,7 +187,7 @@ dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
 
 iteracoes_maximas = 1000
-total_k = 5
+total_k = 20
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
 centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
@@ -217,53 +216,52 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 	reposiciona_centroides(centroides, grupos, dados)
 
 	iteracao_atual += 1
-	print(grupos)
 
 
 indice_silhouette(dados, grupos)
-# import matplotlib
-# from mpl_toolkits.mplot3d import Axes3D
+import matplotlib
+from mpl_toolkits.mplot3d import Axes3D
 
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
-# entradas_np_array = list()
-# for dado in dados.values():
-#     aux = list()
-#     for valor in dado.values():
-#         aux.append(valor)
-#     entradas_np_array.append(aux)
+entradas_np_array = list()
+for dado in dados:
+    aux = list()
+    for valor in dado.values():
+        aux.append(valor)
+    entradas_np_array.append(aux)
 
-# dados_para_plot = np.array(list(entradas_np_array))
+dados_para_plot = np.array(list(entradas_np_array))
 
-# grupos_para_plot = list()
-# for valor in grupos.values():
-#     grupos_para_plot.append(valor)
+grupos_para_plot = list()
+for valor in grupos.values():
+    grupos_para_plot.append(valor)
 
-# grupos_para_plot = np.array(list(grupos_para_plot))
+grupos_para_plot = np.array(list(grupos_para_plot))
 
-# fig = plt.figure(1, figsize = (4, 3))
-# plt.clf()
-# ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
+fig = plt.figure(1, figsize = (4, 3))
+plt.clf()
+ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
 
-# plt.cla()
-# pca = decomposition.PCA(n_components=3)
-# pca.fit(dados_para_plot)
-# dados_para_plot = pca.transform(dados_para_plot)
+plt.cla()
+pca = decomposition.PCA(n_components=3)
+pca.fit(dados_para_plot)
+dados_para_plot = pca.transform(dados_para_plot)
 
-# for name, label in [('Um', 0), ('Dois', 1), ('Tres', 2)]:
-#     ax.text3D(dados_para_plot[grupos_para_plot == label, 0].mean(),
-#               dados_para_plot[grupos_para_plot == label, 1].mean() + 1.5,
-#               dados_para_plot[grupos_para_plot == label, 2].mean(), name,
-#               horizontalalignment='center',
-#               bbox=dict(alpha=.5, edgecolor='w', facecolor='w'))
+for name, label in [('Um', 0), ('Dois', 1), ('Tres', 2)]:
+    ax.text3D(dados_para_plot[grupos_para_plot == label, 0].mean(),
+              dados_para_plot[grupos_para_plot == label, 1].mean() + 1.5,
+              dados_para_plot[grupos_para_plot == label, 2].mean(), name,
+              horizontalalignment='center',
+              bbox=dict(alpha=.5, edgecolor='w', facecolor='w'))
 
-# grupos_para_plot = np.choose(grupos_para_plot, [1, 2, 0]).astype(np.float)
-# ax.scatter(dados_para_plot[:, 0], dados_para_plot[:, 1], dados_para_plot[:, 2], c=grupos_para_plot, edgecolor='k')
+grupos_para_plot = np.choose(grupos_para_plot, [1, 2, 0]).astype(np.float)
+ax.scatter(dados_para_plot[:, 0], dados_para_plot[:, 1], dados_para_plot[:, 2], c=grupos_para_plot, edgecolor='k')
 
-# ax.w_xaxis.set_ticklabels([])
-# ax.w_yaxis.set_ticklabels([])
-# ax.w_zaxis.set_ticklabels([])
+ax.w_xaxis.set_ticklabels([])
+ax.w_yaxis.set_ticklabels([])
+ax.w_zaxis.set_ticklabels([])
 
-# plt.savefig('oi.png')
+plt.savefig('plot.png')
