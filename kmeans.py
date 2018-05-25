@@ -229,7 +229,7 @@ from matplotlib import pyplot as plt
 entradas_np_array = list()
 for dado in dados:
     aux = list()
-    for valor in dado.values():
+    for valor in dado:
         aux.append(valor)
     entradas_np_array.append(aux)
 
