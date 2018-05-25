@@ -187,7 +187,7 @@ dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
 
 iteracoes_maximas = 1000
-total_k = 20
+total_k = 3
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
 centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
@@ -241,6 +241,9 @@ for valor in grupos.values():
 
 grupos_para_plot = np.array(list(grupos_para_plot))
 
+import matplotlib
+matplotlib.use('Agg')
+
 from matplotlib import pyplot as plt
 
 plt.rcParams['figure.figsize'] = (16, 9)
@@ -250,7 +253,6 @@ plt.style.use('ggplot')
 # plt.clf()
 # ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
 
-plt.cla()
 pca = decomposition.PCA(n_components=3)
 pca.fit(dados_para_plot)
 dados_para_plot = pca.transform(dados_para_plot)
