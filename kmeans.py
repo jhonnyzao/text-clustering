@@ -235,6 +235,15 @@ for dado in dados:
 
 dados_para_plot = np.array(list(entradas_np_array))
 
+centroides_np_array = list()
+for centroide in centroides:
+    aux = list()
+    for c in centroide:
+        aux.append(c)
+    centroides_np_array.append(aux)
+
+centroides_para_plot = np.array(list(centroides_np_array))
+
 grupos_para_plot = list()
 for valor in grupos.values():
     grupos_para_plot.append(valor)
@@ -253,14 +262,21 @@ plt.style.use('ggplot')
 # plt.clf()
 # ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
 
-pca = decomposition.PCA(n_components=3)
+pca = decomposition.PCA(n_components=2)
 pca.fit(dados_para_plot)
 dados_para_plot = pca.transform(dados_para_plot)
 
+pca.fit(centroides_para_plot)
+centroides_para_plot = pca.transform(centroides_para_plot)
 
 f1 = dados_para_plot[:, 0]
 f2 = dados_para_plot[:, 1]
+
+c1 = centroides_para_plot[:, 0]
+c2 = centroides_para_plot[:, 3]
+
 plt.scatter(f1, f2, c='black', s=7)
+plt.scatter(c1, c2, c='red', s=7, marker='x')
 # for name, label in [('Um', 0), ('Dois', 1), ('Tres', 2)]:
 #     ax.text3D(dados_para_plot[grupos_para_plot == label, 0].mean(),
 #               dados_para_plot[grupos_para_plot == label, 1].mean() + 1.5,
