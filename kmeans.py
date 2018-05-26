@@ -211,7 +211,7 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 		convergiu = True
 		break
 
-        print("%dª iteracao\n" % (iteracao_atual))
+		print("%dª iteracao\n" % (iteracao_atual))
 
 	reposiciona_centroides(centroides, grupos, dados)
 
@@ -222,25 +222,25 @@ indice_silhouette(dados, grupos)
 
 entradas_np_array = list()
 for dado in dados:
-    aux = list()
-    for valor in dado:
-        aux.append(valor)
-    entradas_np_array.append(aux)
+	aux = list()
+	for valor in dado:
+		aux.append(valor)
+	entradas_np_array.append(aux)
 
 dados_para_plot = np.array(list(entradas_np_array))
 
 centroides_np_array = list()
 for centroide in centroides:
-    aux = list()
-    for c in centroide:
-        aux.append(c)
-    centroides_np_array.append(aux)
+	aux = list()
+	for c in centroide:
+		aux.append(c)
+	centroides_np_array.append(aux)
 
 centroides_para_plot = np.array(list(centroides_np_array))
 
 grupos_para_plot = list()
 for valor in grupos.values():
-    grupos_para_plot.append(valor)
+	grupos_para_plot.append(valor)
 
 grupos_para_plot = np.array(list(grupos_para_plot))
 
