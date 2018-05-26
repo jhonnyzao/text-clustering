@@ -173,7 +173,7 @@ def reposiciona_centroides(centroides, grupos, dados):
 			#percorre a matriz de dados pegando a posicao de todos os que estao na lista indices_media, ou seja, todos os dados associados ao centroide i
 			for indice_media in indices_media:
 				valor = dados[indice_media][k]
-				aux.append(int(valor))
+				aux.append(valor)
 
 			#verificacao necessaria para nao quebrar o programa caso nao haja nenhum dado no grupo de algum centroide
 			if aux:
@@ -187,7 +187,7 @@ dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
 
 iteracoes_maximas = 1000
-total_k = 3
+total_k = 8 
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
 centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
@@ -211,7 +211,7 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 		convergiu = True
 		break
 
-	print("%dª iteracao\n" % (iteracao_atual))
+        print("%dª iteracao\n" % (iteracao_atual))
 
 	reposiciona_centroides(centroides, grupos, dados)
 
@@ -219,12 +219,6 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 
 
 indice_silhouette(dados, grupos)
-# import matplotlib
-# from mpl_toolkits.mplot3d import Axes3D
-
-#matplotlib.use('Agg')
-
-#from matplotlib import pyplot as plt
 
 entradas_np_array = list()
 for dado in dados:
@@ -258,10 +252,6 @@ from matplotlib import pyplot as plt
 plt.rcParams['figure.figsize'] = (16, 9)
 plt.style.use('ggplot')
 
-# fig = plt.figure(1, figsize = (4, 3))
-# plt.clf()
-# ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
-
 pca = decomposition.PCA(n_components=2)
 pca.fit(dados_para_plot)
 dados_para_plot = pca.transform(dados_para_plot)
@@ -273,22 +263,9 @@ f1 = dados_para_plot[:, 0]
 f2 = dados_para_plot[:, 1]
 
 c1 = centroides_para_plot[:, 0]
-c2 = centroides_para_plot[:, 3]
+c2 = centroides_para_plot[:, 1]
 
+plt.scatter(c1, c2, c='red', s=14, marker='x')
 plt.scatter(f1, f2, c='black', s=7)
-plt.scatter(c1, c2, c='red', s=7, marker='x')
-# for name, label in [('Um', 0), ('Dois', 1), ('Tres', 2)]:
-#     ax.text3D(dados_para_plot[grupos_para_plot == label, 0].mean(),
-#               dados_para_plot[grupos_para_plot == label, 1].mean() + 1.5,
-#               dados_para_plot[grupos_para_plot == label, 2].mean(), name,
-#               horizontalalignment='center',
-#               bbox=dict(alpha=.5, edgecolor='w', facecolor='w'))
-
-# grupos_para_plot = np.choose(grupos_para_plot, [1, 2, 0]).astype(np.float)
-# ax.scatter(dados_para_plot[:, 0], dados_para_plot[:, 1], dados_para_plot[:, 2], c=grupos_para_plot, edgecolor='k')
-
-# ax.w_xaxis.set_ticklabels([])
-# ax.w_yaxis.set_ticklabels([])
-# ax.w_zaxis.set_ticklabels([])
 
 plt.savefig('plot.png')
