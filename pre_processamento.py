@@ -67,3 +67,27 @@ class PreProcessamento:
 			tokens[i] = [word.lower() for word in token if word not in stop_words]
 
 		return tokens
+
+
+	def remove_palavras_irrelevantes(self, dados):
+		limite_maximo = len(dados)*95/100
+		limite_minimo = len(dados)*5/100
+
+		nova_matriz = np.array()
+		palavras_a_remover = list()
+
+		for i, palavra in enumerate(dados[0]):
+			contador = 0
+			for j, texto in enumerate(dados):
+				if palavra[j] > 0 :
+					contador += 1
+
+			if contador > limite_maximo or contador < limite_minimo:
+				palavras_a_remover.append(palavra)
+
+		palavras_a_remover = sorted(palavras_a_remover, reverse=True)
+
+		for palavra_a_remover in palavras_a_remover:
+			nova_matriz = np.delete(dados, np_s[palavra_a_remover], 1)
+
+		return nova_matriz
