@@ -250,6 +250,12 @@ def x_means(dados):
 		if not False in [c[0] for c in centroides]:
 			centroides_estado_final = True
 
+def calcula_bic(centroide):
+	return
+
+def fragmenta_centroide_em_dois(dados, centroide):
+	return []
+
 
 iteracoes_maximas = 1000
 total_k = 8 
