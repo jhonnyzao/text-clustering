@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 from nltk.stem import *
 from collections import defaultdict
 import numpy as np
+from collections import Counter
 
 class PreProcessamento:
 
@@ -70,24 +71,33 @@ class PreProcessamento:
 
 
 	def remove_palavras_irrelevantes(self, dados):
-		limite_maximo = len(dados)*95/100
-		limite_minimo = len(dados)*5/100
+		#limites representam a porcentagem de textos em que cada palavra aparece
+		limite_maximo = len(dados[0])*99/100
+		limite_minimo = len(dados[0])*1/100
 
-		nova_matriz = np.array()
+		nova_matriz = dados
 		palavras_a_remover = list()
 
-		for i, palavra in enumerate(dados[0]):
+		#percorre todas as colunas da matriz de dados (cada coluna representa uma palavra)
+		for i in range(len(dados[0])):
 			contador = 0
+			#percorre cada um dos textos para cada palavra e incrementa a variavel de controle caso ela
+			#esteja presente no texto
 			for j, texto in enumerate(dados):
-				if palavra[j] > 0 :
+				if texto[i] > 0:
 					contador += 1
 
-			if contador > limite_maximo or contador < limite_minimo:
-				palavras_a_remover.append(palavra)
+			#se a palavra no estiver dentro dos limites minimos e maximos, ela nao eh
+			#representativa para a massa e nao deve ser utilizada para fins de clustering
+			if contador >= limite_maximo or contador <= limite_minimo:
+				palavras_a_remover.append(i)
 
+		#ordena as palavras a serem removidas de forma decrescente para o removedor nao
+		#se perder com os indices
 		palavras_a_remover = sorted(palavras_a_remover, reverse=True)
 
+		#remove cada uma das palavras irrelevantes pro clustering
 		for palavra_a_remover in palavras_a_remover:
-			nova_matriz = np.delete(dados, np_s[palavra_a_remover], 1)
+			nova_matriz = np.delete(nova_matriz, np.s_[palavra_a_remover], 1)
 
 		return nova_matriz

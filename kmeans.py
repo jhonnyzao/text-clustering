@@ -7,7 +7,7 @@ from copy import copy
 from random import randint
 import random
 from pre_processamento import *
-from sklearn import decomposition
+#from sklearn import decomposition
 
 def inicializa_centroides_aleatoriamente(dados, total_k):
 	dimensao = (total_k, len(dados[0]))
@@ -42,7 +42,7 @@ def inicializa_centroides_sobre_dados(dados, total_k):
 
 
 def inicializa_k_means_mais_mais(dados_copia, total_k):
-	centroides = defaultdict(dict)
+	centroides = np.zeros((total_k, len(dados[0])))
 
 	if total_k < 1:
 		print('O número de centroides escolhidos precisa ser maior do que 0')
@@ -57,7 +57,7 @@ def inicializa_k_means_mais_mais(dados_copia, total_k):
 		#com sua respectiva distancia do mais proximo dos centroides ja escolhidos
 		for x, dado in enumerate(dados_copia):
 			distancias_centroides_escolhidos = list()
-			for y, centroide in centroides.items():
+			for y, centroide in enumerate(centroides):
 				distancias_centroides_escolhidos.append(round(distancia_euclidiana(centroide, dado), 2))
 			minimo = min(distancias_centroides_escolhidos)
 			#o algoritmo assume distancias elevadas ao quadrado
@@ -186,11 +186,12 @@ tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
 
+dados = pp.remove_palavras_irrelevantes(dados)
 iteracoes_maximas = 1000
 total_k = 8 
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
-centroides = inicializa_centroides_sobre_dados(dados.copy(), total_k)
+centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
 
 grupos = defaultdict(dict)
 grupos_ultima_iteracao = defaultdict(dict)
@@ -211,7 +212,7 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 		convergiu = True
 		break
 
-		print("%dª iteracao\n" % (iteracao_atual))
+	print("%dª iteracao\n" % (iteracao_atual))
 
 	reposiciona_centroides(centroides, grupos, dados)
 
@@ -220,52 +221,52 @@ while (iteracao_atual <= iteracoes_maximas or not convergiu):
 
 indice_silhouette(dados, grupos)
 
-entradas_np_array = list()
-for dado in dados:
-	aux = list()
-	for valor in dado:
-		aux.append(valor)
-	entradas_np_array.append(aux)
+# entradas_np_array = list()
+# for dado in dados:
+# 	aux = list()
+# 	for valor in dado:
+# 		aux.append(valor)
+# 	entradas_np_array.append(aux)
 
-dados_para_plot = np.array(list(entradas_np_array))
+# dados_para_plot = np.array(list(entradas_np_array))
 
-centroides_np_array = list()
-for centroide in centroides:
-	aux = list()
-	for c in centroide:
-		aux.append(c)
-	centroides_np_array.append(aux)
+# centroides_np_array = list()
+# for centroide in centroides:
+# 	aux = list()
+# 	for c in centroide:
+# 		aux.append(c)
+# 	centroides_np_array.append(aux)
 
-centroides_para_plot = np.array(list(centroides_np_array))
+# centroides_para_plot = np.array(list(centroides_np_array))
 
-grupos_para_plot = list()
-for valor in grupos.values():
-	grupos_para_plot.append(valor)
+# grupos_para_plot = list()
+# for valor in grupos.values():
+# 	grupos_para_plot.append(valor)
 
-grupos_para_plot = np.array(list(grupos_para_plot))
+# grupos_para_plot = np.array(list(grupos_para_plot))
 
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
-plt.rcParams['figure.figsize'] = (16, 9)
-plt.style.use('ggplot')
+# plt.rcParams['figure.figsize'] = (16, 9)
+# plt.style.use('ggplot')
 
-pca = decomposition.PCA(n_components=2)
-pca.fit(dados_para_plot)
-dados_para_plot = pca.transform(dados_para_plot)
+# pca = decomposition.PCA(n_components=2)
+# pca.fit(dados_para_plot)
+# dados_para_plot = pca.transform(dados_para_plot)
 
-pca.fit(centroides_para_plot)
-centroides_para_plot = pca.transform(centroides_para_plot)
+# pca.fit(centroides_para_plot)
+# centroides_para_plot = pca.transform(centroides_para_plot)
 
-f1 = dados_para_plot[:, 0]
-f2 = dados_para_plot[:, 1]
+# f1 = dados_para_plot[:, 0]
+# f2 = dados_para_plot[:, 1]
 
-c1 = centroides_para_plot[:, 0]
-c2 = centroides_para_plot[:, 1]
+# c1 = centroides_para_plot[:, 0]
+# c2 = centroides_para_plot[:, 1]
 
-plt.scatter(c1, c2, c='red', s=14, marker='x')
-plt.scatter(f1, f2, c='black', s=7)
+# plt.scatter(c1, c2, c='red', s=14, marker='x')
+# plt.scatter(f1, f2, c='black', s=7)
 
-plt.savefig('plot.png')
+# plt.savefig('plot.png')
