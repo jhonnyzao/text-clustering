@@ -213,24 +213,42 @@ def k_means(dados, centroides, total_k):
 
 def x_means(dados):
 	k_inicial = 5
-	centroides = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
-	grupos = k_means(dados, centroides, k_inicial)
+	centroides_iniciais = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
+	grupos = k_means(dados, centroides_iniciais, k_inicial)
 
-	print(grupos)
 	dados_por_grupo = defaultdict(dict)
 
+	#percorre o dict de grupos e monta um novo dict para facilitar a manipulacao dos dados
+	#nessa nova estrutura, um dict de k linhas representam k centroides, e seus respectivos
+	#conteudos sao as linhas de dados a eles associados
 	for grupo in range(k_inicial):
 		dados_grupo = []
 		for i, dado in grupos.items():
 			if dado == grupo:
-				dados_grupo.append(i)
+				dados_grupo.append(dados[i])
 		dados_por_grupo[grupo] = dados_grupo
 
-	print(dados_por_grupo)
-	exit()
-	
-	for centroide in range(k_inicial):
-		dados_centroide = list()
+	centroides = []
+	for centroide_inicial in centroides_iniciais:
+		centroides.append((False, centroide_inicial))
+
+	centroides_estado_final = False
+	while (not centroides_estado_final):
+		for i, centroide in centroides:
+			novos_centroides = fragmenta_centroide_em_dois(dados_por_grupo[i], centroide)
+
+			bic_centroide_pai = calcula_bic(centroide) 
+			bic_c1 = calcula_bic(novos_centroides[0][1])
+			bic_c2 = calcula_bic(novos_centroides[1][1])
+
+			if bic_c1 > bic_centroide_pai or bic_c2 > bic_centroide_pai:
+				centroides.append(novos_centroides[0])
+				centroides.append(novos_centroides[1])
+			else:
+				centroide[0] = True
+
+		if not False in [c[0] for c in centroides]:
+			centroides_estado_final = True
 
 
 iteracoes_maximas = 1000
@@ -242,9 +260,12 @@ dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
 dados = pp.remove_palavras_irrelevantes(dados)
 
-x_means(dados)
+#x_means(dados)
 
-#eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
+#eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja
+#alterada durante as movimentacoes dos centroides
 centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
+
+grupos = x_means(dados)
 
 indice_silhouette(dados, grupos)
