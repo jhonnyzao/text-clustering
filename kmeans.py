@@ -7,7 +7,6 @@ from copy import copy
 from random import randint
 import random
 from pre_processamento import *
-#from sklearn import decomposition
 
 def inicializa_centroides_aleatoriamente(dados, total_k):
 	dimensao = (total_k, len(dados[0]))
@@ -149,6 +148,8 @@ def obtem_matriz_distancias(centroides, dados):
 
 
 def obtem_formacao_dos_grupos(matriz_distancias):
+	grupos = defaultdict(dict)
+
 	#percorre cada coluna
 	for i, texto in matriz_distancias[0].items():
 		aux = list()
@@ -180,93 +181,70 @@ def reposiciona_centroides(centroides, grupos, dados):
 				media = round(np.average(aux), 2)
 				centroide[k] = media
 
-pp = PreProcessamento()
 
+def k_means(dados, centroides, total_k):
+	grupos = defaultdict(dict)
+	grupos_ultima_iteracao = defaultdict(dict)
+	convergiu = False
+	iteracao_atual = 0
+
+	#duas condicoes de parada
+	while (iteracao_atual <= iteracoes_maximas or not convergiu):
+		matriz_distancias = obtem_matriz_distancias(centroides, dados)
+
+		#variavel que guarda ultimo estado de grupos para analise de convergencia
+		grupos_ultima_iteracao = grupos.copy()
+
+		grupos = obtem_formacao_dos_grupos(matriz_distancias)
+
+		#compara se algum dado mudou de centroide e assume convergencia em caso negativo
+		if grupos_ultima_iteracao == grupos:
+			convergiu = True
+			break
+
+		print("%dª iteracao\n" % (iteracao_atual))
+
+		reposiciona_centroides(centroides, grupos, dados)
+
+		iteracao_atual += 1
+
+	return grupos
+
+
+def x_means(dados):
+	k_inicial = 5
+	centroides = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
+	grupos = k_means(dados, centroides, k_inicial)
+
+	print(grupos)
+	dados_por_grupo = defaultdict(dict)
+
+	for grupo in range(k_inicial):
+		dados_grupo = []
+		for i, dado in grupos.items():
+			if dado == grupo:
+				dados_grupo.append(i)
+		dados_por_grupo[grupo] = dados_grupo
+
+	print(dados_por_grupo)
+	exit()
+	
+	for centroide in range(k_inicial):
+		dados_centroide = list()
+
+
+iteracoes_maximas = 1000
+total_k = 8 
+
+pp = PreProcessamento()
 tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
-
 dados = pp.remove_palavras_irrelevantes(dados)
-iteracoes_maximas = 1000
-total_k = 8 
+
+x_means(dados)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja alterada durante as movimentacoes dos centroides
 centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
 
-grupos = defaultdict(dict)
-grupos_ultima_iteracao = defaultdict(dict)
-convergiu = False
-iteracao_atual = 0
-
-#duas condicoes de parada
-while (iteracao_atual <= iteracoes_maximas or not convergiu):
-	matriz_distancias = obtem_matriz_distancias(centroides, dados)
-
-	#variavel que guarda ultimo estado de grupos para analise de convergencia
-	grupos_ultima_iteracao = grupos.copy()
-
-	grupos = obtem_formacao_dos_grupos(matriz_distancias)
-
-	#compara se algum dado mudou de centroide e assume convergencia em caso negativo
-	if grupos_ultima_iteracao == grupos:
-		convergiu = True
-		break
-
-	print("%dª iteracao\n" % (iteracao_atual))
-
-	reposiciona_centroides(centroides, grupos, dados)
-
-	iteracao_atual += 1
-
-
 indice_silhouette(dados, grupos)
-
-# entradas_np_array = list()
-# for dado in dados:
-# 	aux = list()
-# 	for valor in dado:
-# 		aux.append(valor)
-# 	entradas_np_array.append(aux)
-
-# dados_para_plot = np.array(list(entradas_np_array))
-
-# centroides_np_array = list()
-# for centroide in centroides:
-# 	aux = list()
-# 	for c in centroide:
-# 		aux.append(c)
-# 	centroides_np_array.append(aux)
-
-# centroides_para_plot = np.array(list(centroides_np_array))
-
-# grupos_para_plot = list()
-# for valor in grupos.values():
-# 	grupos_para_plot.append(valor)
-
-# grupos_para_plot = np.array(list(grupos_para_plot))
-
-# import matplotlib
-# matplotlib.use('Agg')
-
-# from matplotlib import pyplot as plt
-
-# plt.rcParams['figure.figsize'] = (16, 9)
-# plt.style.use('ggplot')
-
-# pca = decomposition.PCA(n_components=2)
-# pca.fit(dados_para_plot)
-# dados_para_plot = pca.transform(dados_para_plot)
-
-# pca.fit(centroides_para_plot)
-# centroides_para_plot = pca.transform(centroides_para_plot)
-
-# f1 = dados_para_plot[:, 0]
-# f2 = dados_para_plot[:, 1]
-
-# c1 = centroides_para_plot[:, 0]
-# c2 = centroides_para_plot[:, 1]
-
-# plt.scatter(c1, c2, c='red', s=14, marker='x')
-# plt.scatter(f1, f2, c='black', s=7)
-
-# plt.savefig('plot.png')
