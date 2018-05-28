@@ -21,35 +21,22 @@ def compute_bic(kmeans,X):
     """
     # assign centers and labels
     centers = [kmeans.cluster_centers_]
-    print('centers:')
-    print(centers)
-    print('\n')
     labels  = kmeans.labels_
-    print('labels:')
-    print(labels)
-    print('\n')
     #number of clusters
     m = kmeans.n_clusters
-    print('m:')
-    print(m)
-    print('\n')
     # size of the clusters
     n = np.bincount(labels)
-    print('n:')
-    print(n)
-    print('\n')
     #size of data set
     N, d = X.shape
-    print('centers:')
-    print(N, d)
-    print('\n')
 
     #compute variance for all clusters beforehand
     cl_var = (1.0 / (N - m) / d) * sum([sum(distance.cdist(X[np.where(labels == i)], [centers[0][i]], 
              'euclidean')**2) for i in range(m)])
 
+    print(cl_var)
     const_term = 0.5 * m * np.log(N) * (d+1)
 
+    print(const_term)
     BIC = np.sum([n[i] * np.log(n[i]) -
                n[i] * np.log(N) -
              ((n[i] * d) / 2) * np.log(2*np.pi*cl_var) -
