@@ -114,7 +114,7 @@ def indice_silhouette(dados, grupos):
 				valores_cluster_diferente.append(distancia_euclidiana(dado, dados[j]))
 
 	#na literatura, b(i) eh o nome da variavel que guarda a distancia media dos dados em um
-	#centroide para todos os outros dados de centroides diferentes	
+	#centroide para todos os outros dados de centroides diferentes
 	b = round(sum(valores_cluster_diferente)/len(valores_cluster_diferente), 2)
 
 	#na literatura, a(i) eh o nome da variavel que guarda a distancia media dos dados em um
@@ -123,7 +123,7 @@ def indice_silhouette(dados, grupos):
 
 	indice_silhouette = round((b - a)/max(a, b), 2)
 	print(indice_silhouette)
-	
+
 
 def distancia_euclidiana(centroide, dado):
 	total = 0
@@ -248,7 +248,7 @@ def x_means(dados):
 
 				calcula_bic(dados, dados_por_grupo, centroides_iniciais)
 
-				bic_centroide_pai = calcula_bic(centroide) 
+				bic_centroide_pai = calcula_bic(centroide)
 				bic_c1 = calcula_bic(novos_centroides[0][1])
 				bic_c2 = calcula_bic(novos_centroides[1][1])
 
@@ -266,19 +266,31 @@ def calcula_bic(dados, dados_por_grupo, centroides):
 	variancia = calcula_variancia_clusters(dados, dados_por_grupo, centroides)
 	constante = 0.5 * len(dados_por_grupo) * np.log(len(dados)) * len(dados[0]+1)
 
-	for centroide in len(dados_por_grupo):
-		bic = 
+	bic = 0
 
-	return True
+	for centroide in len(dados_por_grupo):
+		bic += (len(dados_por_grupo[i]) - np.log(len(dados_por_grupo[i]))) - \
+		(len(dados_por_grupo[i]) * np.log(len(dados))) - \
+		((len(dados_por_grupo[i]) * len(dados[0])) / 2) * \
+		np.log(2 * np.pi * variancia) - \
+		((len(dados_por_grupo[i]) - 1) * \
+		len(dados[0]) / 2)
+
+	bic = bic - constante
+
+	print(bic)
+	exit()
+	return bic
 
 
 def calcula_variancia_clusters(dados, dados_por_grupo, centroides):
-	soma_todas_distancias = 0
-
 	#no calculo da variacia, o denominador é formado pela quantidade de dados menos a quantidade de
 	#grupos multiplicado pela quantidade de dimensoes
 	denominador = (len(dados) - len(dados_por_grupo)) * len(dados[0])
 
+	soma_todas_distancias = 0
+
+	#incrementa o quadrado da distancia euclidiana de todos os dados para todos os centroides
 	for i, dados_grupo in dados_por_grupo.items():
 		soma_distancias_grupo = 0
 		for dado in dados_grupo:
@@ -286,6 +298,7 @@ def calcula_variancia_clusters(dados, dados_por_grupo, centroides):
 
 		soma_todas_distancias += soma_distancias_grupo
 
+	#final da formula da variania, que eh a soma total das distancias quadradas sobre o denominador
 	variancia = soma_todas_distancias/denominador
 
 	return variancia
@@ -300,23 +313,23 @@ def fragmenta_centroide_em_dois(dados, centroide):
 
 		#encontra o dado que tem o maior valor para o atributo dessa iteracao
 		valor_maximo_dado = max(dado[i] for dado in dados)
-		
+
 		#o centroide antigo eh encarado com um repelente dos novos centroides, ou seja,
 		#ele inicializa um mais proximo do valor maximo do grupo (o dado com maior valor pro atributo)
 		#e outro no sentido oposto, criando um grande vetor ligando as duas bordas e sendo
 		#dividido por 3
 		distancia_a_percorrer = (valor_maximo_dado - dimensao)/3
-		
+
 		novo_c1.append(round(dimensao + distancia_a_percorrer, 2))
 		novo_c2.append(round(dimensao - distancia_a_percorrer, 2))
 
 	novos_centroides = [novo_c1, novo_c2]
-	
+
 	return novos_centroides
 
 
 iteracoes_maximas = 1000
-total_k = 8 
+total_k = 8
 
 pp = PreProcessamento()
 tokens = pp.carrega_textos()
