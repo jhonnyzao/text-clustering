@@ -183,6 +183,12 @@ def reposiciona_centroides(centroides, grupos, dados):
 
 
 def k_means(dados, centroides, total_k):
+	print('dados')
+	print(dados)
+	print('\n')
+	print('centroides:')
+	print(centroides)
+
 	grupos = defaultdict(dict)
 	grupos_ultima_iteracao = defaultdict(dict)
 	convergiu = False
@@ -208,13 +214,13 @@ def k_means(dados, centroides, total_k):
 
 		iteracao_atual += 1
 
-	return grupos
+	return grupos, centroides
 
 
 def x_means(dados):
 	k_inicial = 5
 	centroides_iniciais = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
-	grupos = k_means(dados, centroides_iniciais, k_inicial)
+	grupos, c = k_means(dados, centroides_iniciais, k_inicial)
 
 	dados_por_grupo = defaultdict(dict)
 
@@ -234,27 +240,51 @@ def x_means(dados):
 
 	centroides_estado_final = False
 	while (not centroides_estado_final):
-		for i, centroide in centroides:
-			novos_centroides = fragmenta_centroide_em_dois(dados_por_grupo[i], centroide)
+		for i, centroide in enumerate(centroides):
+			if not centroide[0]:
+				#quebra o centroide atual em dois
+				novos_centroides = fragmenta_centroide_em_dois(dados_por_grupo[i], centroide[1])
+				novos_grupos, novos_centroides = k_means(dados_por_grupo[i].copy(), novos_centroides, 2)
 
-			bic_centroide_pai = calcula_bic(centroide) 
-			bic_c1 = calcula_bic(novos_centroides[0][1])
-			bic_c2 = calcula_bic(novos_centroides[1][1])
+				bic_centroide_pai = calcula_bic(centroide) 
+				bic_c1 = calcula_bic(novos_centroides[0][1])
+				bic_c2 = calcula_bic(novos_centroides[1][1])
 
-			if bic_c1 > bic_centroide_pai or bic_c2 > bic_centroide_pai:
-				centroides.append(novos_centroides[0])
-				centroides.append(novos_centroides[1])
-			else:
-				centroide[0] = True
+				if bic_c1 > bic_centroide_pai or bic_c2 > bic_centroide_pai:
+					centroides.append(novos_centroides[0])
+					centroides.append(novos_centroides[1])
+				else:
+					centroide[0] = True
 
 		if not False in [c[0] for c in centroides]:
 			centroides_estado_final = True
+
 
 def calcula_bic(centroide):
 	return
 
 def fragmenta_centroide_em_dois(dados, centroide):
-	return []
+	novo_c1 = []
+	novo_c2 = []
+
+	#percorre cada atributo do centroide
+	for i, dimensao in enumerate(centroide):
+
+		#encontra o dado que tem o maior valor para o atributo dessa iteracao
+		valor_maximo_dado = max(dado[i] for dado in dados)
+		
+		#o centroide antigo eh encarado com um repelente dos novos centroides, ou seja,
+		#ele inicializa um mais proximo do valor maximo do grupo (o dado com maior valor pro atributo)
+		#e outro no sentido oposto, criando um grande vetor ligando as duas bordas e sendo
+		#dividido por 3
+		distancia_a_percorrer = (valor_maximo_dado - dimensao)/3
+		
+		novo_c1.append(round(dimensao + distancia_a_percorrer, 2))
+		novo_c2.append(round(dimensao - distancia_a_percorrer, 2))
+
+	novos_centroides = [novo_c1, novo_c2]
+	
+	return novos_centroides
 
 
 iteracoes_maximas = 1000
@@ -270,7 +300,7 @@ dados = pp.remove_palavras_irrelevantes(dados)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja
 #alterada durante as movimentacoes dos centroides
-centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
+#centroides = inicializa_k_means_mais_mais(dados.copy(), total_k)
 
 grupos = x_means(dados)
 
