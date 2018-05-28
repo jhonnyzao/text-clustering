@@ -246,6 +246,8 @@ def x_means(dados):
 				novos_centroides = fragmenta_centroide_em_dois(dados_por_grupo[i], centroide[1])
 				novos_grupos, novos_centroides = k_means(dados_por_grupo[i].copy(), novos_centroides, 2)
 
+				calcula_bic(dados, dados_por_grupo, centroides_iniciais)
+
 				bic_centroide_pai = calcula_bic(centroide) 
 				bic_c1 = calcula_bic(novos_centroides[0][1])
 				bic_c2 = calcula_bic(novos_centroides[1][1])
@@ -260,8 +262,34 @@ def x_means(dados):
 			centroides_estado_final = True
 
 
-def calcula_bic(centroide):
-	return
+def calcula_bic(dados, dados_por_grupo, centroides):
+	variancia = calcula_variancia_clusters(dados, dados_por_grupo, centroides)
+	constante = 0.5 * len(dados_por_grupo) * np.log(len(dados)) * len(dados[0]+1)
+
+	for centroide in len(dados_por_grupo):
+		bic = 
+
+	return True
+
+
+def calcula_variancia_clusters(dados, dados_por_grupo, centroides):
+	soma_todas_distancias = 0
+
+	#no calculo da variacia, o denominador é formado pela quantidade de dados menos a quantidade de
+	#grupos multiplicado pela quantidade de dimensoes
+	denominador = (len(dados) - len(dados_por_grupo)) * len(dados[0])
+
+	for i, dados_grupo in dados_por_grupo.items():
+		soma_distancias_grupo = 0
+		for dado in dados_grupo:
+			soma_distancias_grupo += distancia_euclidiana(centroides[i], dado)**2
+
+		soma_todas_distancias += soma_distancias_grupo
+
+	variancia = soma_todas_distancias/denominador
+
+	return variancia
+
 
 def fragmenta_centroide_em_dois(dados, centroide):
 	novo_c1 = []
@@ -295,8 +323,6 @@ tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
 dados = pp.remove_palavras_irrelevantes(dados)
-
-#x_means(dados)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja
 #alterada durante as movimentacoes dos centroides
