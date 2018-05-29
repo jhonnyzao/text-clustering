@@ -218,7 +218,7 @@ def k_means(dados, centroides, total_k):
 
 
 def x_means(dados):
-	k_inicial = 5
+	k_inicial = 2
 	centroides_iniciais = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
 	grupos, c = k_means(dados, centroides_iniciais, k_inicial)
 
@@ -226,12 +226,12 @@ def x_means(dados):
 
 	#percorre o dict de grupos e monta um novo dict para facilitar a manipulacao dos dados
 	#nessa nova estrutura, um dict de k linhas representam k centroides, e seus respectivos
-	#conteudos sao as linhas de dados a eles associados
+	#conteudos sao os indices dos dados a eles associados
 	for grupo in range(k_inicial):
 		dados_grupo = []
 		for i, dado in grupos.items():
 			if dado == grupo:
-				dados_grupo.append(dados[i])
+				dados_grupo.append(i)
 		dados_por_grupo[grupo] = dados_grupo
 
 	centroides = []
@@ -242,15 +242,19 @@ def x_means(dados):
 	while (not centroides_estado_final):
 		for i, centroide in enumerate(centroides):
 			if not centroide[0]:
+				bic_centroide_pai = calcula_bic(dados, [dados_por_grupo[i]], [centroide[1]])
+				print(pic_centroide_pai)
+				exit()
+
 				#quebra o centroide atual em dois
-				novos_centroides = fragmenta_centroide_em_dois(dados_por_grupo[i], centroide[1])
-				novos_grupos, novos_centroides = k_means(dados_por_grupo[i].copy(), novos_centroides, 2)
+				novos_centroides = fragmenta_centroide_em_dois(carga_dados_do_grupo, centroide[1])
+				#passa o kmeans localmente nos dois novos centroides
+				novos_grupos, novos_centroides = k_means(carga_dados_do_grupo.copy(), novos_centroides, 2)
 
 				calcula_bic(dados, dados_por_grupo, centroides_iniciais)
 
-				bic_centroide_pai = calcula_bic(centroide)
-				bic_c1 = calcula_bic(novos_centroides[0][1])
-				bic_c2 = calcula_bic(novos_centroides[1][1])
+				bic_c1 = calcula_bic(carga_dados_do_grupo, novos_centroides[0][1])
+				bic_c2 = calcula_bic(carga_dados_do_grupo, novos_centroides[1][1])
 
 				if bic_c1 > bic_centroide_pai or bic_c2 > bic_centroide_pai:
 					centroides.append(novos_centroides[0])
@@ -263,13 +267,16 @@ def x_means(dados):
 
 
 def calcula_bic(dados, dados_por_grupo, centroides):
-	variancia = calcula_variancia_clusters(dados, dados_por_grupo, centroides)
+	carga_dados_do_grupo = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in dados_por_grupo]
+
+	variancia = calcula_variancia_clusters(dados, carga_dados_do_grupo, centroides)
 	constante = 0.5 * len(dados_por_grupo) * np.log(len(dados)) * len(dados[0]+1)
 
 	bic = 0
-
-	for centroide in len(dados_por_grupo):
-		bic += (len(dados_por_grupo[i]) - np.log(len(dados_por_grupo[i]))) - \
+	#formula de calculo retirada da combinacao da literatura com uma discussao em
+	#foruns de IA, ambos referenciados no relatorio
+	for i in range(len(centroides)):
+		bic += (len(dados_por_grupo[i]) * np.log(len(dados_por_grupo[i]))) - \
 		(len(dados_por_grupo[i]) * np.log(len(dados))) - \
 		((len(dados_por_grupo[i]) * len(dados[0])) / 2) * \
 		np.log(2 * np.pi * variancia) - \
@@ -278,8 +285,6 @@ def calcula_bic(dados, dados_por_grupo, centroides):
 
 	bic = bic - constante
 
-	print(bic)
-	exit()
 	return bic
 
 
@@ -291,7 +296,7 @@ def calcula_variancia_clusters(dados, dados_por_grupo, centroides):
 	soma_todas_distancias = 0
 
 	#incrementa o quadrado da distancia euclidiana de todos os dados para todos os centroides
-	for i, dados_grupo in dados_por_grupo.items():
+	for i, dados_grupo in enumerate(dados_por_grupo):
 		soma_distancias_grupo = 0
 		for dado in dados_grupo:
 			soma_distancias_grupo += distancia_euclidiana(centroides[i], dado)**2
@@ -331,51 +336,10 @@ def fragmenta_centroide_em_dois(dados, centroide):
 iteracoes_maximas = 1000
 total_k = 8
 
-pp = PreProcessamento2()
+pp = PreProcessamento()
 tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Fazer o corpus
-#testar
-#printar
-
-
-pp.representacao_inverse_doc_frequency(dicionario, tokens, corpus)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-exit()
 dados = pp.remove_palavras_irrelevantes(dados)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja
