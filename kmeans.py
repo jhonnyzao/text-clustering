@@ -212,7 +212,7 @@ def k_means(dados, centroides, total_k):
 
 
 def x_means(dados):
-	k_inicial = 2
+	k_inicial = 4
 	centroides_iniciais = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
 	grupos, c = k_means(dados, centroides_iniciais, k_inicial)
 
@@ -236,7 +236,7 @@ def x_means(dados):
 	while (not centroides_estado_final):
 		for i, centroide in enumerate(centroides):
 			if not centroide[0]:
-				bic_centroide_pai = calcula_bic(dados, [dados_por_grupo[i]], [centroide[1]])
+				bic_centroide_pai = calcula_bic([dados[z] for z, dado in enumerate(dados_por_grupo[i])], [dados_por_grupo[i]], [centroide[1]], dados)
 				dados_centroide_pai = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in [dados_por_grupo[i]]]
 
 				#quebra o centroide atual em dois
@@ -251,10 +251,9 @@ def x_means(dados):
 							novo_dado_por_grupo.append(k)
 					novos_dados_por_grupo.append(novo_dado_por_grupo)
 
-				bic_filhos = calcula_bic(dados, novos_dados_por_grupo, novos_centroides)
+				bic_filhos = calcula_bic([dados[z] for z, dado in enumerate(dados_por_grupo[i])], novos_dados_por_grupo, novos_centroides, dados)
 				print(bic_centroide_pai)
 				print(bic_filhos)
-				exit()
 
 				bic_c1 = calcula_bic(carga_dados_do_grupo, novos_centroides[0][1])
 				bic_c2 = calcula_bic(carga_dados_do_grupo, novos_centroides[1][1])
@@ -269,11 +268,8 @@ def x_means(dados):
 			centroides_estado_final = True
 
 
-def calcula_bic(dados, dados_por_grupo, centroides):
-	print(dados)
-	print(dados_por_grupo)
-	print(centroides)
-	carga_dados_do_grupo = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in dados_por_grupo]
+def calcula_bic(dados, dados_por_grupo, centroides, dados_global):
+	carga_dados_do_grupo = [[dados_global[dado] for dado in dado_por_grupo] for dado_por_grupo in dados_por_grupo]
 
 	variancia = calcula_variancia_clusters(dados, carga_dados_do_grupo, centroides)
 	constante = 0.5 * len(dados_por_grupo) * np.log(len(dados)) * len(dados[0]+1)
