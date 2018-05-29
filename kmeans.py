@@ -183,12 +183,6 @@ def reposiciona_centroides(centroides, grupos, dados):
 
 
 def k_means(dados, centroides, total_k):
-	print('dados')
-	print(dados)
-	print('\n')
-	print('centroides:')
-	print(centroides)
-
 	grupos = defaultdict(dict)
 	grupos_ultima_iteracao = defaultdict(dict)
 	convergiu = False
@@ -243,15 +237,24 @@ def x_means(dados):
 		for i, centroide in enumerate(centroides):
 			if not centroide[0]:
 				bic_centroide_pai = calcula_bic(dados, [dados_por_grupo[i]], [centroide[1]])
-				print(pic_centroide_pai)
-				exit()
+				dados_centroide_pai = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in [dados_por_grupo[i]]]
 
 				#quebra o centroide atual em dois
-				novos_centroides = fragmenta_centroide_em_dois(carga_dados_do_grupo, centroide[1])
+				novos_centroides = fragmenta_centroide_em_dois(dados_centroide_pai[0], centroide[1])
 				#passa o kmeans localmente nos dois novos centroides
-				novos_grupos, novos_centroides = k_means(carga_dados_do_grupo.copy(), novos_centroides, 2)
+				novos_grupos, novos_centroides = k_means(dados_centroide_pai[0].copy(), novos_centroides, 2)
+				novos_dados_por_grupo = []
+				for j in range(2):
+					novo_dado_por_grupo = []
+					for k, dado in novos_grupos.items():
+						if dado == j:
+							novo_dado_por_grupo.append(k)
+					novos_dados_por_grupo.append(novo_dado_por_grupo)
 
-				calcula_bic(dados, dados_por_grupo, centroides_iniciais)
+				bic_filhos = calcula_bic(dados, novos_dados_por_grupo, novos_centroides)
+				print(bic_centroide_pai)
+				print(bic_filhos)
+				exit()
 
 				bic_c1 = calcula_bic(carga_dados_do_grupo, novos_centroides[0][1])
 				bic_c2 = calcula_bic(carga_dados_do_grupo, novos_centroides[1][1])
@@ -267,6 +270,9 @@ def x_means(dados):
 
 
 def calcula_bic(dados, dados_por_grupo, centroides):
+	print(dados)
+	print(dados_por_grupo)
+	print(centroides)
 	carga_dados_do_grupo = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in dados_por_grupo]
 
 	variancia = calcula_variancia_clusters(dados, carga_dados_do_grupo, centroides)
