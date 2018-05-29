@@ -48,18 +48,20 @@ class PreProcessamento2:
         for doc in corpus:
             if doc.split().count(palavra) > 0:
                 cont += 1
-        return np.log(qtd_docs/cont)
+        if cont == 0:
+            return 0
+        else:
+            return np.log(qtd_docs/cont)
 
     def representacao_inverse_doc_frequency(self, dicionario, tokens, corpus):
+        qtd_docs = len(corpus)
         tamanho = (len(tokens), len(dicionario))
         matriz = np.zeros(tamanho)
-        matriz_tf = representacao_term_frequency(dicionario, tokens)
-
+        matriz_tf = self.representacao_term_frequency(dicionario, tokens)
         for i, texto in enumerate(tokens):
             for j, palavra in enumerate(texto):
                 if palavra in dicionario:
-                    matriz = matriz_tf[i][dicionario.index(palavra)] * idf(palavra, corpus)
-
+                    matriz[i][dicionario.index(palavra)] = matriz_tf[i][dicionario.index(palavra)] * self.idf(palavra, corpus)
         return matriz
 
     def carrega_textos(self):
@@ -69,7 +71,7 @@ class PreProcessamento2:
 
         while texto_para_processar:
             try:
-                nome_texto = "./textos/0%s.txt" % str(texto_index + 1)
+                nome_texto = "./textos/0%s.txt" % str(texto_index)
                 with open(nome_texto, 'r') as arquivo:
                     textos[texto_index] = arquivo.read().replace('\n', '')
                     texto_index += 1
@@ -86,6 +88,22 @@ class PreProcessamento2:
             tokens[i] = [word.lower() for word in token if word not in stop_words]
 
         return tokens
+
+    def carrega_corpus(self):
+        #textos = {}
+        texto_index = 10
+        texto_para_processar = True
+        corpus = []
+
+        while texto_para_processar:
+            try:
+                nome_texto = "./textos/0%s.txt" % str(texto_index)
+                with open(nome_texto, 'r') as arquivo:
+                    corpus.append(arquivo.read().replace('\n', ' '))
+                    texto_index += 1
+            except FileNotFoundError:
+                texto_para_processar = False
+        return corpus
 
     def remove_palavras_irrelevantes(self, dados):
         # limites representam a porcentagem de textos em que cada palavra aparece

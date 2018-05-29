@@ -318,10 +318,51 @@ def fragmenta_centroide_em_dois(dados, centroide):
 iteracoes_maximas = 1000
 total_k = 8 
 
-pp = PreProcessamento()
+pp = PreProcessamento2()
 tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
 dados = pp.representacao_binaria(dicionario, tokens)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Fazer o corpus
+#testar
+#printar
+
+
+pp.representacao_inverse_doc_frequency(dicionario, tokens, corpus)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit()
 dados = pp.remove_palavras_irrelevantes(dados)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja
