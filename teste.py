@@ -35,6 +35,11 @@ def compute_bic(kmeans,X):
 
     const_term = 0.5 * m * np.log(N) * (d+1)
 
+    for i in range(m):
+        print(n[i])
+    print('\n')
+
+
     BIC = np.sum([n[i] * np.log(n[i]) -
                n[i] * np.log(N) -
              ((n[i] * d) / 2) * np.log(2*np.pi*cl_var) -
@@ -58,4 +63,4 @@ KMeans = [cluster.KMeans(n_clusters = i, init="k-means++").fit(X) for i in ks]
 # now run for each cluster the BIC computation
 BIC = [compute_bic(kmeansi,X) for kmeansi in KMeans]
 
-print (BIC)
+#print (BIC)
