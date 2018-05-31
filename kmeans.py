@@ -202,7 +202,7 @@ def k_means(dados, centroides, total_k):
 			convergiu = True
 			break
 
-		print("%dª iteracao\n" % (iteracao_atual))
+		#print("%dª iteracao\n" % (iteracao_atual))
 
 		reposiciona_centroides(centroides, grupos, dados)
 
@@ -212,7 +212,7 @@ def k_means(dados, centroides, total_k):
 
 
 def x_means(dados):
-	k_inicial = 4
+	k_inicial = 3
 	centroides_iniciais = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
 	grupos, c = k_means(dados, centroides_iniciais, k_inicial)
 
@@ -229,53 +229,94 @@ def x_means(dados):
 		dados_por_grupo[grupo] = dados_grupo
 
 	centroides = []
-	for centroide_inicial in centroides_iniciais:
-		centroides.append((False, centroide_inicial))
+	for centroide in c:
+		centroides.append((False, centroide))
 
 	centroides_estado_final = False
-	while (not centroides_estado_final):
+	#while (not centroides_estado_final):
+	for q in range(1):
 		for i, centroide in enumerate(centroides):
 			if not centroide[0]:
 				bic_centroide_pai = calcula_bic([dados[z] for z, dado in enumerate(dados_por_grupo[i])], [dados_por_grupo[i]], [centroide[1]], dados)
+				#bic_teste_pai = calcula_bic_2(dados, [centroide[1]], dados)
 				dados_centroide_pai = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in [dados_por_grupo[i]]]
 
 				#quebra o centroide atual em dois
 				novos_centroides = fragmenta_centroide_em_dois(dados_centroide_pai[0], centroide[1])
 				#passa o kmeans localmente nos dois novos centroides
 				novos_grupos, novos_centroides = k_means(dados_centroide_pai[0].copy(), novos_centroides, 2)
-				novos_dados_por_grupo = []
-				for j in range(2):
-					novo_dado_por_grupo = []
-					for k, dado in novos_grupos.items():
-						if dado == j:
-							novo_dado_por_grupo.append(k)
-					novos_dados_por_grupo.append(novo_dado_por_grupo)
 
+				novo_grupo_1 = []
+				novo_grupo_2 = []
+				for j, dado_por_grupo in enumerate(dados_por_grupo[i]):
+					if novos_grupos[j] == 0:
+						novo_grupo_1.append(dado_por_grupo)
+					else:
+						novo_grupo_2.append(dado_por_grupo)
+
+				novos_dados_por_grupo = [novo_grupo_1, novo_grupo_2]
+
+
+				#bic_teste_filhos = calcula_bic_2([dados_por_grupo[i]], novos_centroides, dados)
 				bic_filhos = calcula_bic([dados[z] for z, dado in enumerate(dados_por_grupo[i])], novos_dados_por_grupo, novos_centroides, dados)
+				print('bic pai')
 				print(bic_centroide_pai)
+				print('bic filho')
 				print(bic_filhos)
+				print('\n')
 
-				bic_c1 = calcula_bic(carga_dados_do_grupo, novos_centroides[0][1])
-				bic_c2 = calcula_bic(carga_dados_do_grupo, novos_centroides[1][1])
+				# if bic_filhos > bic_centroide_pai:
+					# print('oi')
+					# centroides.append(novos_centroides[0])
+					# centroides.append(novos_centroides[1])
+				# else:
+				# 	centroide[0] = True
 
-				if bic_c1 > bic_centroide_pai or bic_c2 > bic_centroide_pai:
-					centroides.append(novos_centroides[0])
-					centroides.append(novos_centroides[1])
-				else:
-					centroide[0] = True
+		# if not False in [c[0] for c in centroides]:
+		# 	centroides_estado_final = True
 
-		if not False in [c[0] for c in centroides]:
-			centroides_estado_final = True
+
+def calcula_bic_2(dados_por_grupo, centroides, dados):
+	num_points = sum(len(cluster) for cluster in dados_por_grupo)
+	num_dims = len(dados[0])
+
+	log_likelihood = calcula_loglikelihood(num_points, num_dims, dados_por_grupo, centroides, dados)
+
+	num_params = free_params(len(dados_por_grupo), num_dims)
+
+	bic = log_likelihood - num_params / 2 * np.log(num_points)
+
+	return bic
+
+
+def free_params(num_clusters, num_dims):
+	return num_clusters * (num_dims +1)
+
+
+def calcula_loglikelihood(num_points, num_dims, dados_por_grupo, centroides, dados):
+	ll = 0
+	carga_dados_do_grupo = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in dados_por_grupo]
+
+	for dado in dados_por_grupo:
+		fRn = len(dado)
+		t1 = fRn * np.log(fRn)
+		t2 = fRn * np.log(num_points)
+		variancia = calcula_variancia_clusters(carga_dados_do_grupo[0], carga_dados_do_grupo, centroides)
+		t3 = ((fRn * num_dims) / 2) * np.log((2 * np.pi) * variancia)
+		t4 = num_dims * (fRn - 1) / 2
+		ll += t1-t2-t3-t4
+
+	return ll
 
 
 def calcula_bic(dados, dados_por_grupo, centroides, dados_global):
 	carga_dados_do_grupo = [[dados_global[dado] for dado in dado_por_grupo] for dado_por_grupo in dados_por_grupo]
 
 	variancia = calcula_variancia_clusters(dados, carga_dados_do_grupo, centroides)
-	constante = 0.5 * len(dados_por_grupo) * np.log(len(dados)) * len(dados[0]+1)
+	constante = 0.5 * len(centroides) * np.log(len(dados)) * len(dados[0]+1)
 
 	bic = 0
-	#formula de calculo retirada da combinacao da literatura com uma discussao em
+	#formula heuristica de calculo retirada da combinacao da literatura com uma discussao em
 	#foruns de IA, ambos referenciados no relatorio
 	for i in range(len(centroides)):
 		bic += (len(dados_por_grupo[i]) * np.log(len(dados_por_grupo[i]))) - \
@@ -341,7 +382,7 @@ total_k = 8
 pp = PreProcessamento()
 tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
-dados = pp.representacao_binaria(dicionario, tokens)
+dados = pp.representacao_term_frequency(dicionario, tokens)
 dados = pp.remove_palavras_irrelevantes(dados)
 
 #eh importante passar uma copia do dict de dados para que a matriz de dados original nao seja
@@ -350,4 +391,4 @@ dados = pp.remove_palavras_irrelevantes(dados)
 
 grupos = x_means(dados)
 
-indice_silhouette(dados, grupos)
+#indice_silhouette(dados, grupos)
