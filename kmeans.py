@@ -214,7 +214,7 @@ def k_means(dados, centroides, total_k):
 
 def x_means(dados):
 	#comeca com um nro baixo de centroides e os inicializa com kmeans++ para agilizar o comeco
-	k_inicial = 2
+	k_inicial = 5
 	centroides_iniciais = inicializa_k_means_mais_mais(dados.copy(), k_inicial)
 	grupos, centroides_k_means = k_means(dados, centroides_iniciais, k_inicial)
 
@@ -236,7 +236,7 @@ def x_means(dados):
 		centroides.append(list((False, centroide)))
 
 	todos_os_centroides_convergidos = False
-	centroides_a_apagar = []
+	centroides_a_apagar = list()
 
 	#enquanto tiver centroide que ainda precisa ser fragmentado
 	while (not todos_os_centroides_convergidos):
@@ -244,37 +244,46 @@ def x_means(dados):
 		for i, centroide in enumerate(centroides):
 			#mas apenas os que ainda precisam ser redivididos sofrem o conteudo das interacoes
 			if not centroide[0]:
-				#centroide pai eh o cluster que ainda nao sabemos se sera fragmentado
-				bic_centroide_pai = calcula_bic([dados[j] for j, dado in enumerate(dados_por_grupo[i])], [dados_por_grupo[i]], [centroide[1]], dados)
-				dados_centroide_pai = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in [dados_por_grupo[i]]]
+				#se so tem um dado no grupo, nem precisa calcular bic
+				total_dados_interacao = [dados[j] for j, dado in enumerate(dados_por_grupo[i])]
+				if len(total_dados_interacao) > 1:
+					#centroide pai eh o cluster que ainda nao sabemos se sera fragmentado
+					bic_centroide_pai = calcula_bic([dados[j] for j, dado in enumerate(dados_por_grupo[i])], [dados_por_grupo[i]], [centroide[1]], dados)
+					dados_centroide_pai = [[dados[dado] for dado in dado_por_grupo] for dado_por_grupo in [dados_por_grupo[i]]]
 
-				#quebra o centroide atual em dois
-				novos_centroides = fragmenta_centroide_em_dois(dados_centroide_pai[0], centroide[1])
-				#passa o kmeans localmente nos dois novos centroides
-				novos_grupos, novos_centroides = k_means(dados_centroide_pai[0].copy(), novos_centroides, 2)
+					#quebra o centroide atual em dois
+					novos_centroides = fragmenta_centroide_em_dois(dados_centroide_pai[0], centroide[1])
+					#passa o kmeans localmente nos dois novos centroides
+					novos_grupos, novos_centroides = k_means(dados_centroide_pai[0].copy(), novos_centroides, 2)
 
-				#recupera os indices dos dados que poderao formar os novos grupos
-				novo_grupo_1 = []
-				novo_grupo_2 = []
-				for j, dado_por_grupo in enumerate(dados_por_grupo[i]):
-					if novos_grupos[j] == 0:
-						novo_grupo_1.append(dado_por_grupo)
-					else:
-						novo_grupo_2.append(dado_por_grupo)
+					#recupera os indices dos dados que poderao formar os novos grupos
+					novo_grupo_1 = []
+					novo_grupo_2 = []
+					for j, dado_por_grupo in enumerate(dados_por_grupo[i]):
+						if novos_grupos[j] == 0:
+							novo_grupo_1.append(dado_por_grupo)
+						else:
+							novo_grupo_2.append(dado_por_grupo)
 
-				novos_dados_por_grupo = [novo_grupo_1, novo_grupo_2]
+					novos_dados_por_grupo = [novo_grupo_1, novo_grupo_2]
 
-				bic_filhos = calcula_bic([dados[z] for z, dado in enumerate(dados_por_grupo[i])], novos_dados_por_grupo, novos_centroides, dados)
+					#se algum dos novos centroides so tiver um dado, nem precisa calcular bic
+					if len(novo_grupo_1) > 1 and len(novo_grupo_2) > 1:
+						bic_filhos = calcula_bic([dados[j] for j, dado in enumerate(dados_por_grupo[i])], novos_dados_por_grupo, novos_centroides, dados)
 
-				#usa o indice bic pra decidir se os centroides fragmentados sao melhores
-				#que um centroide unico
-				if bic_filhos > bic_centroide_pai or np.isinf(bic_filhos):
-					centroides.append(list((False, novos_centroides[0])))
-					centroides.append(list((False, novos_centroides[1])))
-					centroides_a_apagar.append(i)
+						print('bics')
+						print(bic_centroide_pai)
+						print(bic_filhos)
+						print('\n')
+						#usa o indice bic pra decidir se os centroides fragmentados sao melhores
+						#que um centroide unico
+						if bic_filhos > bic_centroide_pai or np.isinf(bic_filhos):
+							centroides.append(list((False, novos_centroides[0])))
+							centroides.append(list((False, novos_centroides[1])))
+							centroides_a_apagar.append(i)
 
-					dados_por_grupo.append(novo_grupo_1)
-					dados_por_grupo.append(novo_grupo_2)
+							dados_por_grupo.append(novo_grupo_1)
+							dados_por_grupo.append(novo_grupo_2)
 
 				#tendo o centroide fragmentado ou nao, ele nao precisa ser revisitado pois
 				#ja estava em seu estado final ou se dividiu em dois
@@ -283,8 +292,21 @@ def x_means(dados):
 		#se todo mundo ja atingiu o estado final
 		if not False in [c[0] for c in centroides]:
 			todos_os_centroides_convergidos = True
+		
+	#ordena as palavras a serem removidas de forma decrescente para o removedor nao
+	#se perder com os indices
+	centroides_a_apagar = sorted(centroides_a_apagar, reverse=True)
 
+	#remove os centroides que foram dividos, pois seus filhos estao os representando
 	for centroide_a_apagar in centroides_a_apagar:
+		del centroides[centroide_a_apagar]
+		del dados_por_grupo[centroide_a_apagar]
+
+	print(len(centroides))
+	print(dados_por_grupo)
+	exit()
+
+	return centroides
 
 
 
@@ -327,11 +349,18 @@ def calcula_variancia_clusters(dados, dados_por_grupo, centroides):
 
 		soma_todas_distancias += soma_distancias_grupo
 
-	#para evitar erro de divisao por zero, dado que se trata de um valor possivel para o denominador
-	if denominador == 0:
-		return 0
+	# #para evitar erro de divisao por zero, dado que se trata de um valor possivel para o denominador
+	# if denominador == 0:
+	# 	return 0
 
 	#final da formula da variancia, que eh a soma total das distancias quadradas sobre o denominador
+	print('len dados')
+	print(len(dados), len(dados_por_grupo))
+	print('soma todas distancias')
+	print(soma_todas_distancias)
+	print('denominador')
+	print(denominador)
+	print('\n')
 	variancia = soma_todas_distancias/denominador
 
 	return variancia
