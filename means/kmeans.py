@@ -13,7 +13,7 @@ class Kmeans:
 		self.logging = logging
 
 
-	def k_means(self, dados, centroides, total_k):
+	def k_means(self, dados, centroides, total_k, tipo_distancia):
 		total_k = int(total_k)
 		iteracoes_maximas = 1000
 		grupos = defaultdict(dict)
@@ -24,7 +24,7 @@ class Kmeans:
 
 		#duas condicoes de parada
 		while (iteracao_atual <= iteracoes_maximas or not convergiu):
-			matriz_distancias = self.obtem_matriz_distancias(centroides, dados)
+			matriz_distancias = self.obtem_matriz_distancias(centroides, dados, tipo_distancia)
 
 			#variavel que guarda ultimo estado de grupos para analise de convergencia
 			grupos_ultima_iteracao = grupos.copy()
@@ -178,12 +178,29 @@ class Kmeans:
 		return total
 
 
-	def obtem_matriz_distancias(self, centroides, dados):
+	def distancia_similaridade_cosseno(self, centroide, dado):
+		#trata o centroide como lado x e dado como y
+		soma_x = 0
+		soma_y = 0
+		soma_xy = 0
+
+		for i, valor_centroide in enumerate(centroide):
+			soma_x += centroide[i]**2
+			soma_y += dado[i]**2
+			soma_xy += centroide[i] * dado[i]
+
+		distancia = soma_xy/(soma_x * soma_y)**0.5
+		distancia = round(distancia, 2)
+
+		return distancia
+
+
+	def obtem_matriz_distancias(self, centroides, dados, tipo_distancia):
 		matriz_distancias = defaultdict(dict)
 		#dois loops aninhados para comparar a distancia de cada centroide com cada dado
 		for i, centroide in enumerate(centroides):
 			for j, dado in enumerate(dados):
-				matriz_distancias[i][j] = self.distancia_euclidiana(centroide, dado)
+				matriz_distancias[i][j] = eval('self.distancia_%s(centroide, dado)' % tipo_distancia)
 
 		return matriz_distancias
 
@@ -223,12 +240,12 @@ class Kmeans:
 					centroide[k] = media
 
 
-	def x_means(self, dados, k):
+	def x_means(self, dados, k, tipo_distancia):
 		k = int(k)
 		#comeca com um nro baixo de centroides e os inicializa com kmeans++ para agilizar o comeco
 		k_inicial = k
 		centroides_iniciais = self.inicializa_k_means_mais_mais(dados.copy(), k_inicial)
-		grupos, centroides_k_means = self.k_means(dados, centroides_iniciais, k_inicial)
+		grupos, centroides_k_means = self.k_means(dados, centroides_iniciais, k_inicial, tipo_distancia)
 
 		#percorre o dict de grupos e monta um novo dict para facilitar a manipulacao dos dados
 		#nessa nova estrutura, um dict de k linhas representam k centroides, e seus respectivos
@@ -266,7 +283,7 @@ class Kmeans:
 						#quebra o centroide atual em dois
 						novos_centroides = self.fragmenta_centroide_em_dois(dados_centroide_pai[0], centroide[1])
 						#passa o kmeans localmente nos dois novos centroides
-						novos_grupos, novos_centroides = self.k_means(dados_centroide_pai[0].copy(), novos_centroides, 2)
+						novos_grupos, novos_centroides = self.k_means(dados_centroide_pai[0].copy(), novos_centroides, 2, tipo_distancia)
 
 						#recupera os indices dos dados que poderao formar os novos grupos
 						novo_grupo_1 = []
