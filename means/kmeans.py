@@ -246,6 +246,7 @@ class Kmeans:
 		#comeca com um nro baixo de centroides e os inicializa com kmeans++ para agilizar o comeco
 		k_inicial = k
 		centroides_iniciais = self.inicializa_k_means_mais_mais(dados.copy(), k_inicial)
+		self.logging.info("Iniciando xmeans com %d centroides" % k)
 		grupos, centroides_k_means = self.k_means(dados, centroides_iniciais, k_inicial, tipo_distancia)
 
 		#percorre o dict de grupos e monta um novo dict para facilitar a manipulacao dos dados
@@ -268,6 +269,7 @@ class Kmeans:
 		todos_os_centroides_convergidos = False
 		centroides_a_apagar = list()
 
+		self.logging.info("Iniciando a divisão de centroides")
 		#enquanto tiver centroide que ainda precisa ser fragmentado
 		while (not todos_os_centroides_convergidos):
 			#o dict de centroides vai recebendo os novos centroides formados durante a execucao
@@ -328,6 +330,7 @@ class Kmeans:
 			del centroides[centroide_a_apagar]
 			del dados_por_grupo[centroide_a_apagar]
 
+		self.logging.info("Terminando execucao com %d centroides" % len(centroides))
 		#volta grupos para o formato original para log e para o calculo do silhouette
 		grupos_original = defaultdict(dict)
 		for i in range(len(dados)):
