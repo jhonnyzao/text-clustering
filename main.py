@@ -87,8 +87,8 @@ else:
 	print('O método precisa ter um dos seguintes valores: [kmeans, kmeans++, xmeans]')
 
 total_dados_por_grupo = []
-for i, grupo in enumerate(dados_por_grupo.items()):
-		total_dados_por_grupo[i] = len(grupo)
+for i, grupo in enumerate(dados_por_grupo):
+	total_dados_por_grupo.append(len(grupo))
 
 logging.info('Centroides finais:')
 logging.info(centroides_finais)
