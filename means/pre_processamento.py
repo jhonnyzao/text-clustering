@@ -74,6 +74,7 @@ class PreProcessamento:
         textos = {}
         texto_index = 0
 
+        #for root, dirs, files in os.walk('../textos/'):
         for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\'):
             for file in files:
                 with open(os.path.join(root, file), "r") as arquivo:
