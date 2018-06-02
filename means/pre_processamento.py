@@ -74,8 +74,8 @@ class PreProcessamento:
         textos = {}
         texto_index = 0
 
-        #for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\'):
-        for root, dirs, files in os.walk('/home/joao/text-clustering/textos/'):
+        for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\'):
+        #for root, dirs, files in os.walk('/home/joao/text-clustering/textos/'):
             for file in files:
                 with open(os.path.join(root, file), "rb") as arquivo:
                     texto = str(arquivo.read())
@@ -83,7 +83,7 @@ class PreProcessamento:
                     textos[texto_index] = texto
                     texto_index += 1
 
-        self.logging.info("Iniciando com dataset de %d dados." % len(dados))
+        self.logging.info("Iniciando com dataset de %d dados." % len(textos))
         tokens = []
         for i, texto in textos.items():
             tokenizer = RegexpTokenizer(r'\w+')

@@ -53,6 +53,7 @@ if metodo == 'kmeans':
 
 	if inicializacao not in inicializacoes_possiveis:
 		print('A inicializacao precisa assumir um dos seguintes valores: [aleatoriamente, sobre_dados]')
+		exit()
 
 	centroides = eval('km.inicializa_centroides_%s(dados, numero_k)' % inicializacao)
 
