@@ -8,10 +8,10 @@ import logging
 #coleta dados dos argumentos da linha de comando
 metodo = sys.argv[1]
 numero_k = sys.argv[2]
-calculo_distancia = sys.argv[3]
+metodo_distancia = sys.argv[3]
 representacao = sys.argv[4]
 
-nome_log = 'logs/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+nome_log = 'logs/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.txt'
 logging.basicConfig(filename=nome_log,
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
@@ -20,7 +20,7 @@ logging.basicConfig(filename=nome_log,
 
 logging.info(
 	'Iniciando execucao do %s, com %s clusters, usando distancia %s e dados em representacao %s.'
-	% (metodo, numero_k, calculo_distancia, representacao)
+	% (metodo, numero_k, metodo_distancia, representacao)
 )
 
 #pre processamento de textos
@@ -28,10 +28,13 @@ pp = pre_processamento.PreProcessamento(logging)
 tokens = pp.carrega_textos()
 dicionario = pp.gera_dicionario(tokens)
 
-#usa o argumento de representacao pra transformar os dados em matriz
 representacoes_possiveis = ['binaria', 'tf', 'tf_idf']
 if representacao not in representacoes_possiveis:
 	print('A representacao precisa assumir um dos seguintes valores: [binaria, tf, tf_idf]')
+
+metodos_distancia_possiveis = ['euclidiana', 'similaridade_cosseno']
+if metodo_distancia not in metodos_distancia_possiveis:
+	print('O metodo de distancia precisa assumir um dos seguintes valores: [euclidiana, similaridade_cosseno]')
 
 dados = eval('pp.representacao_%s(dicionario, tokens)' % representacao)
 logging.info('Quantidade de palavras antes da remocao das irrelevantes: %d.' % len(dados[0]))
@@ -53,7 +56,7 @@ if metodo == 'kmeans':
 
 	centroides = eval('km.inicializa_centroides_%s(dados, numero_k)' % inicializacao)
 
-	grupos, centroides_finais = km.k_means(dados.copy(), centroides, numero_k)
+	grupos, centroides_finais = km.k_means(dados.copy(), centroides, numero_k, metodo_distancia)
 
 	#cria um dict para facilitar a visualizacao dos dados por grupo
 	dados_por_grupo = []
@@ -66,7 +69,7 @@ if metodo == 'kmeans':
 
 elif metodo == 'kmeans++':
 	centroides = km.inicializa_k_means_mais_mais(dados.copy(), numero_k)
-	grupos, centroides_finais = km.k_means(dados.copy(), centroides, numero_k)
+	grupos, centroides_finais = km.k_means(dados.copy(), centroides, numero_k, metodo_distancia)
 
 	dados_por_grupo = []
 	for grupo in range(int(numero_k)):
@@ -77,7 +80,7 @@ elif metodo == 'kmeans++':
 		dados_por_grupo.append(dados_grupo)
 
 elif metodo == 'xmeans':
-	grupos, dados_por_grupo, centroides_finais = km.x_means(dados.copy(), numero_k)
+	grupos, dados_por_grupo, centroides_finais = km.x_means(dados.copy(), numero_k, metodo_distancia)
 
 else:
 	print('O método precisa ter um dos seguintes valores: [kmeans, kmeans++, xmeans]')
