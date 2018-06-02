@@ -22,6 +22,7 @@ class Kmeans:
 		convergiu = False
 		iteracao_atual = 0
 
+		self.logging.info('Inicializando iteracao 0 do kmeans')
 		#duas condicoes de parada
 		while (iteracao_atual <= iteracoes_maximas or not convergiu):
 			matriz_distancias = self.obtem_matriz_distancias(centroides, dados, tipo_distancia)
