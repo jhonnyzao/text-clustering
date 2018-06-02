@@ -85,12 +85,18 @@ elif metodo == 'xmeans':
 else:
 	print('O método precisa ter um dos seguintes valores: [kmeans, kmeans++, xmeans]')
 
+total_dados_por_grupo = []
+for i, grupo in enumerate(dados_por_grupo.items()):
+		total_dados_por_grupo[i] = len(grupo)
+
 logging.info('Centroides finais:')
 logging.info(centroides_finais)
 logging.info('Grupos:')
 logging.info(grupos)
 logging.info('Dados por grupo:')
 logging.info(dados_por_grupo)
+logging.info('Total de dados por grupo:')
+logging.info(total_dados_por_grupo)
 
 logging.info('Calculando índice silhouette:')
 silhouette = km.indice_silhouette(dados.copy(), grupos)

@@ -83,6 +83,7 @@ class PreProcessamento:
                     textos[texto_index] = texto
                     texto_index += 1
 
+        self.logging.info("Iniciando com dataset de %d dados." % len(dados))
         tokens = []
         for i, texto in textos.items():
             tokenizer = RegexpTokenizer(r'\w+')
