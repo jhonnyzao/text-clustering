@@ -10,6 +10,7 @@ metodo = sys.argv[1]
 numero_k = sys.argv[2]
 metodo_distancia = sys.argv[3]
 representacao = sys.argv[4]
+corpora = sys.argv[5]
 
 nome_log = 'logs/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.txt'
 logging.basicConfig(filename=nome_log,
@@ -25,7 +26,10 @@ logging.info(
 
 #pre processamento de textos
 pp = pre_processamento.PreProcessamento(logging)
-tokens = pp.carrega_textos()
+corporas_possiveis = ['bbcsports', 'newsgroup20']
+if corpora not in corporas_possiveis:
+	print('O corpora precisa assumir um dos seguintes valores: [bbcsports, newsgroup20]')
+tokens = eval('pp.carrega_textos_%s()' % corpora)
 dicionario = pp.gera_dicionario(tokens)
 
 representacoes_possiveis = ['binaria', 'tf', 'tf_idf']
@@ -47,7 +51,7 @@ km = kmeans.Kmeans(logging)
 
 #parte dos parametros recebidos para iniciar os algoritmos corretos
 if metodo == 'kmeans':
-	inicializacao = sys.argv[5]
+	inicializacao = sys.argv[6]
 	logging.info('Inicializando centroides %s.' % inicializacao)
 	inicializacoes_possiveis = ['aleatoriamente', 'sobre_dados']
 

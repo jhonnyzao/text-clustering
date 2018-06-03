@@ -7,6 +7,7 @@ import numpy as np
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import *
+import itertools, collections
 
 class PreProcessamento:
     def __init__(self, logging):
@@ -70,7 +71,48 @@ class PreProcessamento:
         return matriz
 
 
-    def carrega_textos(self):
+    def carrega_textos_newsgroup20(self):
+        textos = {}
+        texto_index = 0
+
+        def consume(iterator, n): collections.deque(itertools.islice(iterator, n))
+
+        with open('big_corpora/newgroup20.txt', 'r') as arquivo:
+            conteudo = arquivo.readlines()
+
+        texto = ''
+        iterator = conteudo.__iter__()
+
+        #as linhas que comecam com a palavra 'newsgroup:' separam os textos, seguidas de mais
+        #3 linhas de cabecalho. transformar todo o conteudo lido em um iterator ajuda nesse
+        #processo
+        for linha in iterator:
+            if 'Newsgroup:' in linha:
+                consume(iterator, 3)
+                if texto:
+                    texto = texto.replace('\n', '')
+                    textos[texto_index] = texto
+                    texto_index += 1
+                texto = ''
+            else:
+                texto += linha
+
+        self.logging.info("Iniciando com dataset de %d dados." % len(textos))
+        tokens = []
+        #faz o processo de tokenizacao da nltk
+        for i, texto in textos.items():
+            tokenizer = RegexpTokenizer(r'\w+')
+            tokens.append(tokenizer.tokenize(texto))
+
+        #usa a lista de stopwords pronta da nlkt para o ingles e remove os tokens que as contem
+        stop_words = set(stopwords.words("english"))
+        for i, token in enumerate(tokens):
+            tokens[i] = [word.lower() for word in token if word not in stop_words]
+
+        return tokens
+
+
+    def carrega_textos_bbcsports(self):
         textos = {}
         texto_index = 0
 
@@ -85,10 +127,12 @@ class PreProcessamento:
 
         self.logging.info("Iniciando com dataset de %d dados." % len(textos))
         tokens = []
+        #faz o processo de tokenizacao da nltk
         for i, texto in textos.items():
             tokenizer = RegexpTokenizer(r'\w+')
             tokens.append(tokenizer.tokenize(texto))
 
+        #usa a lista de stopwords pronta da nlkt para o ingles e remove os tokens que as contem
         stop_words = set(stopwords.words("english"))
         for i, token in enumerate(tokens):
             tokens[i] = [word.lower() for word in token if word not in stop_words]
