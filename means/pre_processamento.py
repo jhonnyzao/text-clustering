@@ -116,8 +116,8 @@ class PreProcessamento:
         textos = {}
         texto_index = 0
 
-        for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\'):
-        #for root, dirs, files in os.walk('/home/joao/text-clustering/textos/'):
+        for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\bbcsport\\'):
+        #for root, dirs, files in os.walk('/home/joao/text-clustering/textos/bbcsport/'):
             for file in files:
                 with open(os.path.join(root, file), "rb") as arquivo:
                     texto = str(arquivo.read())
@@ -133,6 +133,7 @@ class PreProcessamento:
             tokens.append(tokenizer.tokenize(texto))
 
         #usa a lista de stopwords pronta da nlkt para o ingles e remove os tokens que as contem
+        self.logging.info("Removendo stop words")
         stop_words = set(stopwords.words("english"))
         for i, token in enumerate(tokens):
             tokens[i] = [word.lower() for word in token if word not in stop_words]
@@ -140,7 +141,7 @@ class PreProcessamento:
         return tokens
 
 
-    def remove_palavras_irrelevantes(self, dados):
+    def remove_palavras_irrelevantes(self, dados, corpora, representacao):
         self.logging.info('Removendo palavras irrelevantes')
         #limites representam a porcentagem de textos em que cada palavra aparece
         limite_maximo = len(dados[0])*99/100
@@ -170,5 +171,8 @@ class PreProcessamento:
         #remove cada uma das palavras irrelevantes pro clustering
         for palavra_a_remover in palavras_a_remover:
             nova_matriz = np.delete(nova_matriz, np.s_[palavra_a_remover], 1)
+
+        nome_arquivo = 'textos_pre_processados/%s-%s.txt' % (corpora, representacao)
+        np.savetxt(nome_arquivo, nova_matriz)
 
         return nova_matriz

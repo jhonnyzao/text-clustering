@@ -4,6 +4,7 @@ from means import pre_processamento
 import sys
 from datetime import datetime
 import logging
+import numpy as np
 
 #coleta dados dos argumentos da linha de comando
 metodo = sys.argv[1]
@@ -29,8 +30,6 @@ pp = pre_processamento.PreProcessamento(logging)
 corporas_possiveis = ['bbcsports', 'newsgroup20']
 if corpora not in corporas_possiveis:
 	print('O corpora precisa assumir um dos seguintes valores: [bbcsports, newsgroup20]')
-tokens = eval('pp.carrega_textos_%s()' % corpora)
-dicionario = pp.gera_dicionario(tokens)
 
 representacoes_possiveis = ['binaria', 'tf', 'tf_idf']
 if representacao not in representacoes_possiveis:
@@ -40,12 +39,32 @@ metodos_distancia_possiveis = ['euclidiana', 'similaridade_cosseno']
 if metodo_distancia not in metodos_distancia_possiveis:
 	print('O metodo de distancia precisa assumir um dos seguintes valores: [euclidiana, similaridade_cosseno]')
 
-dados = eval('pp.representacao_%s(dicionario, tokens)' % representacao)
-logging.info('Quantidade de palavras antes da remocao das irrelevantes: %d.' % len(dados[0]))
+#resgata de arquivo caso o corpora ja tenha sido pre processado antes
+nome_arquivo = 'textos_pre_processados/%s-%s.txt' % (corpora, representacao)
+try:
+	carrega_texto_processado = np.loadtxt(nome_arquivo)
+except:
+	carrega_texto_processado = []
 
-#remove as palavras que sao irrelevantes para o clustering, reduzindo bem o numero de dimensoes
-dados = pp.remove_palavras_irrelevantes(dados)
-logging.info('Quantidade de palavras depois da remocao das irrelevantes: %d.' % len(dados[0]))
+if len(carrega_texto_processado) > 0:
+	dados = carrega_texto_processado
+	logging.info(
+		'Corpora ja pre processado antes. Numero de dimensoes: %d.' % len(dados[0])
+	)
+
+else:
+	tokens = eval('pp.carrega_textos_%s()' % corpora)
+	dicionario = pp.gera_dicionario(tokens)
+
+	#remove as palavras que sao irrelevantes para o clustering ou carrega arquivo ja processado
+	#com o objetivo de trabalhar com um numero reduzido de dimensoes
+	dados = eval('pp.representacao_%s(dicionario, tokens)' % representacao)
+	logging.info('Quantidade de palavras antes da remocao das irrelevantes: %d.' % len(dados[0]))
+	
+	dados = pp.remove_palavras_irrelevantes(dados, corpora, representacao)
+	logging.info('Quantidade de palavras depois da remocao das irrelevantes: %d.' % len(dados[0]))
+
+
 
 km = kmeans.Kmeans(logging)
 

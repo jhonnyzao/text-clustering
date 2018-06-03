@@ -172,6 +172,7 @@ class Kmeans:
 
 			silhouette = (b - a)/max(a, b)
 			silhouette = round(silhouette, 2)
+
 			silhouettes_cada_ponto.append(silhouette)
 
 		silhouette_total = np.average(silhouettes_cada_ponto)
