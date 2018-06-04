@@ -140,6 +140,7 @@ class Kmeans:
 
 	def indice_silhouette(self, dados, grupos, metodo_distancia):
 		silhouettes_cada_ponto = []
+
 		for i, dado in enumerate(dados):
 			valores_mesmo_cluster = []
 			valores_cluster_diferente = []
@@ -173,8 +174,11 @@ class Kmeans:
 			silhouette = (b - a)/max(a, b)
 			silhouette = round(silhouette, 2)
 
+			#guarda o silhouette do dado da vez em um array que vai guarda o silhouette de cada ponto
 			silhouettes_cada_ponto.append(silhouette)
 
+		#consideramos que o silhouette total de um agrupamento se da pela media do silhouette
+		#de todos seus dados depois do agrupamento
 		silhouette_total = np.average(silhouettes_cada_ponto)
 
 		return silhouette_total
