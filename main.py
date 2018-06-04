@@ -92,7 +92,7 @@ if metodo == 'kmeans':
 		dados_por_grupo.append(dados_grupo)
 
 elif metodo == 'kmeans++':
-	centroides = km.inicializa_k_means_mais_mais(dados.copy(), numero_k)
+	centroides = km.inicializa_k_means_mais_mais(dados.copy(), numero_k, metodo_distancia)
 	grupos, centroides_finais = km.k_means(dados.copy(), centroides, numero_k, metodo_distancia)
 
 	dados_por_grupo = []

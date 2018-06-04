@@ -1,0 +1,46 @@
+[1mdiff --git a/means/kmeans.py b/means/kmeans.py[m
+[1mindex 82ddd38..64e7da6 100644[m
+[1m--- a/means/kmeans.py[m
+[1m+++ b/means/kmeans.py[m
+[36m@@ -59,7 +59,9 @@[m [mclass Kmeans:[m
+ 			valores_minimos.append(min(linha))[m
+ [m
+ 		valor_maximo = max(valores_maximos)[m
+[32m+[m		[32mprint(valor_maximo)[m
+ 		valor_minimo = min(valores_minimos)[m
+[32m+[m		[32mprint(valor_minimo)[m
+ [m
+ 		for linha in range(0, total_k):[m
+ 			for coluna in range(0, len(dados[0])):[m
+[1mdiff --git a/means/pre_processamento.py b/means/pre_processamento.py[m
+[1mindex 87f4bc7..d84abbb 100644[m
+[1m--- a/means/pre_processamento.py[m
+[1m+++ b/means/pre_processamento.py[m
+[36m@@ -51,22 +51,23 @@[m [mclass PreProcessamento:[m
+ [m
+     def idf(self, palavra, corpus):[m
+         cont = 0[m
+[32m+[m
+         qtd_docs = len(corpus)[m
+         for doc in corpus:[m
+[31m-            if doc.split().count(palavra) > 0:[m
+[32m+[m[32m            if len(doc) > 0:[m
+                 cont += 1[m
+         return np.log(qtd_docs/cont)[m
+ [m
+ [m
+[31m-    def representacao_tf_idf(self, dicionario, tokens, corpus):[m
+[32m+[m[32m    def representacao_tf_idf(self, dicionario, tokens):[m
+         tamanho = (len(tokens), len(dicionario))[m
+         matriz = np.zeros(tamanho)[m
+[31m-        matriz_tf = representacao_term_frequency(dicionario, tokens)[m
+[32m+[m[32m        matriz_tf = self.representacao_tf(dicionario, tokens)[m
+ [m
+         for i, texto in enumerate(tokens):[m
+             for j, palavra in enumerate(texto):[m
+                 if palavra in dicionario:[m
+[31m-                    matriz = matriz_tf[i][dicionario.index(palavra)] * idf(palavra, corpus)[m
+[32m+[m[32m                    matriz = matriz_tf[i][dicionario.index(palavra)] * self.idf(palavra, tokens)[m
+ [m
+         return matriz[m
+ [m

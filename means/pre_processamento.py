@@ -49,24 +49,41 @@ class PreProcessamento:
         return matriz
 
 
-    def idf(self, palavra, corpus):
-        cont = 0
-        qtd_docs = len(corpus)
-        for doc in corpus:
-            if doc.split().count(palavra) > 0:
-                cont += 1
-        return np.log(qtd_docs/cont)
-
-
-    def representacao_tf_idf(self, dicionario, tokens, corpus):
+    def term_frequency(self, dicionario, tokens):
         tamanho = (len(tokens), len(dicionario))
         matriz = np.zeros(tamanho)
-        matriz_tf = representacao_term_frequency(dicionario, tokens)
 
         for i, texto in enumerate(tokens):
             for j, palavra in enumerate(texto):
                 if palavra in dicionario:
-                    matriz = matriz_tf[i][dicionario.index(palavra)] * idf(palavra, corpus)
+                    matriz[i][dicionario.index(palavra)] += 1
+
+        for i, m in enumerate(matriz):
+            for j, linha in enumerate(m):
+                matriz[i][j] = matriz[i][j]/len(tokens[i])
+
+        return matriz
+    
+
+    def idf(self, palavra, tokens):
+        cont = 0
+        qtd_docs = len(tokens)
+
+        for doc in tokens:
+            if palavra in doc:
+                cont += 1
+        return np.log(qtd_docs/cont)
+
+
+    def representacao_tf_idf(self, dicionario, tokens):
+        tamanho = (len(tokens), len(dicionario))
+        matriz = np.zeros(tamanho)
+        matriz_tf = self.term_frequency(dicionario, tokens)
+
+        for i, texto in enumerate(tokens):
+            for j, palavra in enumerate(texto):
+                if palavra in dicionario:
+                    matriz[i][dicionario.index(palavra)] = matriz_tf[i][dicionario.index(palavra)] * self.idf(palavra, tokens)
 
         return matriz
 

@@ -81,7 +81,7 @@ class Kmeans:
 		return centroides
 
 
-	def inicializa_k_means_mais_mais(self, dados_copia, total_k):
+	def inicializa_k_means_mais_mais(self, dados_copia, total_k, metodo_distancia):
 		total_k = int(total_k)
 		centroides = np.zeros((total_k, len(dados_copia[0])))
 
@@ -99,7 +99,9 @@ class Kmeans:
 			for x, dado in enumerate(dados_copia):
 				distancias_centroides_escolhidos = list()
 				for y, centroide in enumerate(centroides):
-					distancias_centroides_escolhidos.append(round(self.distancia_euclidiana(centroide, dado), 2))
+					distancias_centroides_escolhidos.append(
+						eval('self.distancia_%s(centroide, dado)'% metodo_distancia)
+					)
 				minimo = min(distancias_centroides_escolhidos)
 				#o algoritmo assume distancias elevadas ao quadrado
 				distancias[x] = round(minimo ** 2, 2)
@@ -136,7 +138,7 @@ class Kmeans:
 		return centroides
 
 
-	def indice_silhouette(self, dados, grupos):
+	def indice_silhouette(self, dados, grupos, metodo_distancia):
 		silhouettes_cada_ponto = []
 		for i, dado in enumerate(dados):
 			valores_mesmo_cluster = []
@@ -147,7 +149,7 @@ class Kmeans:
 			#para cada dado, percorre toda a matriz que associa dado a centroide, e guarda as distancias euclidianas
 			#nas listas de valores do mesmo cluster ou de cluster diferente de acordo com o cenario
 			for j, grupo in grupos.items():
-				distancia = self.distancia_euclidiana(dado, dados[j])
+				distancia = eval('self.distancia_%s(dado, dados[j])'% metodo_distancia)
 				if grupo == grupo_atual:
 					if distancia != 0:
 						valores_mesmo_cluster.append(distancia)
@@ -157,13 +159,11 @@ class Kmeans:
 			#na literatura, b(i) eh o nome da variavel que guarda a distancia media de um ponto
 			#para todos os outros dados de centroides diferentes
 			b = np.average(valores_cluster_diferente)
-			b = round(b, 2)
 
 			#na literatura, a(i) eh o nome da variavel que guarda a distancia media dos dados em um
 			#centroide para todos os demais dados no mesmo centroide
 			if (len(valores_mesmo_cluster) > 0):
 				a = np.average(valores_mesmo_cluster)
-				a = round(a, 2)
 			else:
 				#aplica uma punicao no silhouette sempre que o kmeans criar um grupo so para
 				#um dado
@@ -257,7 +257,7 @@ class Kmeans:
 		k = int(k)
 		#comeca com um nro baixo de centroides e os inicializa com kmeans++ para agilizar o comeco
 		k_inicial = k
-		centroides_iniciais = self.inicializa_k_means_mais_mais(dados.copy(), k_inicial)
+		centroides_iniciais = self.inicializa_k_means_mais_mais(dados.copy(), k_inicial, tipo_distancia)
 		self.logging.info("Iniciando xmeans com %d centroides" % k)
 		grupos, centroides_k_means = self.k_means(dados, centroides_iniciais, k_inicial, tipo_distancia)
 
