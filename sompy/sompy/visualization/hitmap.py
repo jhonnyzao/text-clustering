@@ -32,6 +32,6 @@ class HitMapView(MatplotView):
             self._set_labels(cents, ax, codebook)
 
         plt.imshow(codebook.reshape(msz[0], msz[1])[::], alpha=.5)
-        plt.show()
+        plt.savefig('hitmap_som.png')
 
         return cents

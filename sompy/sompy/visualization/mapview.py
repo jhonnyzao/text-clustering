@@ -164,7 +164,7 @@ class View2DPacked(MapView):
 
         plt.subplots_adjust(hspace=h, wspace=w)
 
-        plt.show()
+        plt.savefig('som_corpora.png')
         
         
 class View1D(MapView):

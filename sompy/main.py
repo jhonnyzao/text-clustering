@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import pandas as pd
 import numpy as np
@@ -6,6 +8,7 @@ from time import time
 import sompy
 import os,sys,inspect
 import logging
+from datetime import datetime
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -89,3 +92,17 @@ som.train(n_job=1, verbose='info')
 topographic_error = som.calculate_topographic_error()
 
 print(topographic_error)
+
+v = sompy.mapview.View2DPacked(2, 2, 'BBCSport',text_size=8)  
+cl = som.cluster(n_clusters=8)
+getattr(som, 'cluster_labels')
+
+v.show(som, what='cluster')
+
+u = sompy.umatrix.UMatrixView(50, 50, 'umatrix', show_axis=True, text_size=8, show_text=True)
+
+#This is the Umat value
+UMAT  = u.build_u_matrix(som, distance=1, row_normalized=False)
+
+#Here you have Umatrix plus its render
+UMAT = u.show(som, distance2=1, row_normalized=False, show_data=True, contooor=True, blob=False)
