@@ -94,7 +94,7 @@ class PreProcessamento:
 
         def consume(iterator, n): collections.deque(itertools.islice(iterator, n))
 
-        with open('big_corpora/newgroup20.txt', 'r') as arquivo:
+        with open('textos/newsgroup20/newsgroup20.txt', 'r') as arquivo:
             conteudo = arquivo.readlines()
 
         texto = ''
@@ -133,8 +133,8 @@ class PreProcessamento:
         textos = {}
         texto_index = 0
 
-        for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\bbcsport\\'):
-        #for root, dirs, files in os.walk('/home/joao/text-clustering/textos/bbcsport/'):
+        #for root, dirs, files in os.walk(r'C:\\Users\\jhonnyzao\\Documents\\clustering\\textos\\bbcsport\\'):
+        for root, dirs, files in os.walk('/home/joao/text-clustering/textos/bbcsport/'):
             for file in files:
                 with open(os.path.join(root, file), "rb") as arquivo:
                     texto = str(arquivo.read())
