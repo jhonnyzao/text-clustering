@@ -123,7 +123,7 @@ logging.info('Total de dados por grupo:')
 logging.info(total_dados_por_grupo)
 
 logging.info('Calculando índice silhouette:')
-silhouette = km.indice_silhouette(dados.copy(), grupos)
+silhouette = km.indice_silhouette(dados.copy(), grupos, metodo_distancia)
 logging.info(silhouette)
 
 logging.getLogger('clustering')
