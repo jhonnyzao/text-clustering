@@ -23,7 +23,6 @@ logging.basicConfig(filename=nome_log,
                             datefmt='%H:%M:%S',
                             level=logging.DEBUG)
 
-
 mapsize_x = sys.argv[1]
 mapsize_y = sys.argv[2]
 representacao = sys.argv[3]
@@ -42,55 +41,37 @@ logging.info("Iniciando exeucao do SOM")
 
 mapsize = [int(mapsize_x), int(mapsize_y)]
 
-#print
+resgata de arquivo caso o corpora ja tenha sido pre processado antes
+nome_arquivo = 'textos_pre_processados/%s-%s.txt' % (corpora, representacao)
+try:
+	carrega_texto_processado = np.loadtxt(nome_arquivo)
+except:
+	carrega_texto_processado = []
 
-#resgata de arquivo caso o corpora ja tenha sido pre processado antes
-# nome_arquivo = 'textos_pre_processados/%s-%s.txt' % (corpora, representacao)
-# try:
-# 	carrega_texto_processado = np.loadtxt(nome_arquivo)
-# except:
-# 	carrega_texto_processado = []
+if len(carrega_texto_processado) > 0:
+	dados = carrega_texto_processado
+	logging.info(
+		'Corpora ja pre processado antes. Numero de dimensoes: %d.' % len(dados[0])
+	)
 
-# if len(carrega_texto_processado) > 0:
-# 	dados = carrega_texto_processado
-# 	logging.info(
-# 		'Corpora ja pre processado antes. Numero de dimensoes: %d.' % len(dados[0])
-# 	)
+else:
+	tokens = eval('pp.carrega_textos_%s()' % corpora)
+	dicionario = pp.gera_dicionario(tokens)
 
-# else:
-# 	tokens = eval('pp.carrega_textos_%s()' % corpora)
-# 	dicionario = pp.gera_dicionario(tokens)
-
-# 	#remove as palavras que sao irrelevantes para o clustering ou carrega arquivo ja processado
-# 	#com o objetivo de trabalhar com um numero reduzido de dimensoes
-# 	dados = eval('pp.representacao_%s(dicionario, tokens)' % representacao)
-# 	logging.info('Quantidade de palavras antes da remocao das irrelevantes: %d.' % len(dados[0]))
+	#remove as palavras que sao irrelevantes para o clustering ou carrega arquivo ja processado
+	#com o objetivo de trabalhar com um numero reduzido de dimensoes
+	dados = eval('pp.representacao_%s(dicionario, tokens)' % representacao)
+	logging.info('Quantidade de palavras antes da remocao das irrelevantes: %d.' % len(dados[0]))
 	
-# 	dados = pp.remove_palavras_irrelevantes(dados, corpora, representacao)
-# 	logging.info('Quantidade de palavras depois da remocao das irrelevantes: %d.' % len(dados[0]))
+	dados = pp.remove_palavras_irrelevantes(dados, corpora, representacao)
+	logging.info('Quantidade de palavras depois da remocao das irrelevantes: %d.' % len(dados[0]))
 
-dlen = 200
-Data1 = pd.DataFrame(data= 1*np.random.rand(dlen,2))
-Data1.values[:,1] = (Data1.values[:,0][:,np.newaxis] + .42*np.random.rand(dlen,1))[:,0]
-
-Data2 = pd.DataFrame(data= 1*np.random.rand(dlen,2)+1)
-Data2.values[:,1] = (-1*Data2.values[:,0][:,np.newaxis] + .62*np.random.rand(dlen,1))[:,0]
-
-Data3 = pd.DataFrame(data= 1*np.random.rand(dlen,2)+2)
-Data3.values[:,1] = (.5*Data3.values[:,0][:,np.newaxis] + 1*np.random.rand(dlen,1))[:,0]
-
-
-Data4 = pd.DataFrame(data= 1*np.random.rand(dlen,2)+3.5)
-Data4.values[:,1] = (-.1*Data4.values[:,0][:,np.newaxis] + .5*np.random.rand(dlen,1))[:,0]
-
-
-Data1 = np.concatenate((Data1,Data2,Data3,Data4))
-
-som = sompy.SOMFactory.build(Data1, mapsize, mask=None, mapshape='planar', lattice='rect', normalization='var', initialization='pca', neighborhood='gaussian', training='batch', name='sompy')
+#executa o som de fato
+som = sompy.SOMFactory.build(dados, mapsize, mask=None, mapshape='planar', lattice='rect', normalization='var', initialization='pca', neighborhood='gaussian', training='batch', name='sompy')
 som.train(n_job=1, verbose='info')
 
 topographic_error = som.calculate_topographic_error()
-
+print('Erro topográfico:')
 print(topographic_error)
 
 v = sompy.mapview.View2DPacked(2, 2, 'BBCSport',text_size=8)  
@@ -99,10 +80,7 @@ getattr(som, 'cluster_labels')
 
 v.show(som, what='cluster')
 
+#plota a umatrix
 u = sompy.umatrix.UMatrixView(50, 50, 'umatrix', show_axis=True, text_size=8, show_text=True)
-
-#This is the Umat value
 UMAT  = u.build_u_matrix(som, distance=1, row_normalized=False)
-
-#Here you have Umatrix plus its render
 UMAT = u.show(som, distance2=1, row_normalized=False, show_data=True, contooor=True, blob=False)

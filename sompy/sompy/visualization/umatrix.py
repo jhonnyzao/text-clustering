@@ -91,5 +91,5 @@ class UMatrixView(MatplotView):
                          coord[:, 0][sel_point[:, 0]], '.r')
                 sel_points.append(sel_point[:, 0])
 
-        plt.savefig('umatrix.png')
+        plt.savefig('umatrix_corpora.png')
         return sel_points, umat
