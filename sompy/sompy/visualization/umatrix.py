@@ -1,6 +1,7 @@
 from .view import MatplotView
 from matplotlib import pyplot as plt
 from pylab import imshow, contour
+from datetime import datetime
 from math import sqrt
 import numpy as np
 import scipy
@@ -91,5 +92,6 @@ class UMatrixView(MatplotView):
                          coord[:, 0][sel_point[:, 0]], '.r')
                 sel_points.append(sel_point[:, 0])
 
-        plt.savefig('umatrix_corpora.png')
+        nome_imagem = '../../imagens/umatrix/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.png'
+        plt.savefig(nome_imagem)
         return sel_points, umat

@@ -9,12 +9,7 @@ import sompy
 import os,sys,inspect
 import logging
 from datetime import datetime
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-
-from means import pre_processamento
+from pre_processamento import pre_processamento
 
 nome_log = 'logs/som-' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.txt'
 logging.basicConfig(filename=nome_log,
