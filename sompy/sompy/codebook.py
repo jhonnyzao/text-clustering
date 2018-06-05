@@ -39,8 +39,7 @@ class Codebook(object):
     @timeit()
     def random_initialization(self, data):
         """
-        :param data: data to use for the initialization
-        :returns: initialized matrix with same dimension as input data
+        Faz uma inicializacao aleatoria, que nao estamos usando no trabalho
         """
         mn = np.tile(np.min(data, axis=0), (self.nnodes, 1))
         mx = np.tile(np.max(data, axis=0), (self.nnodes, 1))
@@ -50,6 +49,11 @@ class Codebook(object):
     @timeit()
     def pca_linear_initialization(self, data):
         """
+        O PCA eh um metodo complexo de reducao de dimensionalidade que pode ser aplicado em conjuntos
+        de dados de muitas dimensoes para facilitar o manuseio dos dados e seus respectivos calculos.
+        Seus procedimentos nao foram explorados para este trabalho, mas a documentacao original dos autores
+        se encontra por todo o metodo
+
         We initialize the map, just by using the first two first eigen vals and
         eigenvectors
         Further, we create a linear combination of them in the new map by
@@ -118,11 +122,8 @@ class Codebook(object):
 
     def grid_dist(self, node_ind):
         """
-        Calculates grid distance based on the lattice type.
-
-        :param node_ind: number between 0 and number of nodes-1. Depending on
-                         the map size, starting from top left
-        :returns: matrix representing the distance matrix
+        Calcula a distancia no grid de acordo com o tipo de lattice. Nesse trabalho, estamos usando
+        apenas a latice retangular
         """
         if self.lattice == 'rect':
             return self._rect_dist(node_ind)
@@ -135,25 +136,24 @@ class Codebook(object):
 
     def _rect_dist(self, node_ind):
         """
-        Calculates the distance of the specified node to the other nodes in the
-        matrix, generating a distance matrix
+        Calcula a distancia do no especificado ate os outros neuronios da matriz, gerando
+        uma matriz de distancias, assim como no Kmeans
 
-        Ej. The distance matrix for the node_ind=5, that corresponds to
-        the_coord (1,1)
+        Exemplo: a matriz de distancias para o node_ind=5, que corresponde a coordenada (1,1) é:
            array([[2, 1, 2, 5],
                   [1, 0, 1, 4],
                   [2, 1, 2, 5],
                   [5, 4, 5, 8]])
 
-        :param node_ind: number between 0 and number of nodes-1. Depending on
-                         the map size, starting from top left
-        :returns: matrix representing the distance matrix
+        params:
+            - node_ind: numero entre 0 e numero de neuronios-1. Depende do mapsize, 
+            contando do topo da esquerda
         """
         rows = self.mapsize[0]
         cols = self.mapsize[1]
         dist = None
 
-        # bmu should be an integer between 0 to no_nodes
+        # bmu precisa ser um inteiro entre 0 e o numero de neuronios
         if 0 <= node_ind <= (rows*cols):
             node_col = int(node_ind % cols)
             node_row = int(node_ind / cols)
@@ -161,11 +161,14 @@ class Codebook(object):
             raise InvalidNodeIndexError(
                 "Node index '%s' is invalid" % node_ind)
 
+        #se existirem linhas e colunas
         if rows > 0 and cols > 0:
             r = np.arange(0, rows, 1)[:, np.newaxis]
             c = np.arange(0, cols, 1)
+            #faz a distancia euclidiana
             dist2 = (r-node_row)**2 + (c-node_col)**2
 
+            #cria um array unidimensional com as distancias
             dist = dist2.ravel()
         else:
             raise InvalidMapsizeError(

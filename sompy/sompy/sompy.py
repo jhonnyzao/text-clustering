@@ -28,10 +28,8 @@ from .codebook import Codebook
 from .neighborhood import NeighborhoodFactory
 from .normalization import NormalizatorFactory
 
-#lbugnon
-#import ipdb
 import sompy
-#
+
 
 class ComponentNamesError(Exception):
     pass
@@ -169,8 +167,8 @@ class SOM(object):
 
     def calculate_map_dist(self):
         """
-        Calculates the grid distance, which will be used during the training
-        steps. It supports only planar grids for the moment
+        Calcula as distancias que sao usadas durante o treinamento atraves da funcao
+        presente no codebook
         """
         nnodes = self.codebook.nnodes
 
@@ -180,15 +178,6 @@ class SOM(object):
         return distance_matrix
 
 
-    """
-    Funcao que faz o treinamento da SOM. Parametros relevantes pro trabalho:
-        - n_job: numero de jobs usados para paralelizar o treinamento. o codigo, por enquanto,
-        so suporta 1
-        - verbose: o nivel de debug do treinamento. pode assumir 'debug' ou 'info'. vamos usar info
-        para obter apenas interessantes durante a execucao
-        - shared_memory: flag pra controlar a ativação do compartilhamento de memoria, que nao
-        vamos usar
-    """
     @timeit()
     def train(self,
               n_job=1,
@@ -203,31 +192,28 @@ class SOM(object):
               train_len_factor=1,
               maxtrainlen=np.Inf):
 
+        """
+        Funcao que faz o treinamento da SOM. Parametros relevantes pro trabalho:
+            - n_job: numero de jobs usados para paralelizar o treinamento. o codigo, por enquanto,
+            so suporta 1
+            - verbose: o nivel de debug do treinamento. pode assumir 'debug' ou 'info'. vamos usar info
+            para obter apenas interessantes durante a execucao
+            - shared_memory: flag pra controlar a ativação do compartilhamento de memoria, que nao
+            vamos usar
+        """
+
         #seta nivel de debug conforme escolhido
         logging.root.setLevel(
             getattr(logging, verbose.upper()) if verbose else logging.ERROR)
 
         logging.info(" Training...")
-        logging.debug((
-            "--------------------------------------------------------------\n"
-            " details: \n"
-            "      > data len is {data_len} and data dimension is {data_dim}\n"
-            "      > map size is {mpsz0},{mpsz1}\n"
-            "      > array size in log10 scale is {array_size}\n"
-            "      > number of jobs in parallel: {n_job}\n"
-            " -------------------------------------------------------------\n")
-            .format(data_len=self._dlen,
-                    data_dim=self._dim,
-                    mpsz0=self.codebook.mapsize[0],
-                    mpsz1=self.codebook.mapsize[1],
-                    array_size=np.log10(
-                        self._dlen * self.codebook.nnodes * self._dim),
-                    n_job=n_job))
 
         #faz a inicializacao conforme especificacao nos parametros
         if self.initialization == 'random':
             self.codebook.random_initialization(self._data)
 
+        #pca eh um metodo de reducao de dimensao que considera as n dimensoes mais relevantes para
+        #representar um dado e um cenario reduzido
         elif self.initialization == 'pca':
             self.codebook.pca_linear_initialization(self._data)
 
@@ -269,7 +255,7 @@ class SOM(object):
         #Adiciona o trainlen_factor, que eh irrelevante para os parametros que estamos usando
         trainlen=int(trainlen*trainlen_factor)
         
-        #define o raio inicial e final a serem usados no treinamento
+        #define o raio de vizinhanca inicial e final a serem usados no treinamento
         #nessa fase do algoritmo, esses valores sao grandes pois estamos focando em formar os 
         #grupos, sem necessariamente muita precisao. podemos buscar raios um pouco menores caso a
         #inicializacao tenha sido feita usando PCA
@@ -390,18 +376,19 @@ class SOM(object):
         del b
         return bmu
 
-    """
-    metodo para atualizar todos os neuronios que pertencem a vizinhanca do BMU.
-    primeiro ele monta uma mini matriz com a vizinhanca de cada neuronio
-    eh um metodo super eficiente, baseado na implementacao do algoritmo da SOM
-    toolbox para matlab, feito pela Helsinky University
-    parametros:
-     - training_data: os dados no formato de sempre (m linhas sao dados, n colunas sao dimensoes)
-     - bmu: o bmu pra cada dado. tem formato (2, m) e a primeira row guarda os indices dos BMU
-
-    """
     @timeit(logging.DEBUG)
     def update_codebook_voronoi(self, training_data, bmu, neighborhood):
+        """
+        metodo para atualizar todos os neuronios que pertencem a vizinhanca do BMU.
+        primeiro ele monta uma mini matriz com a vizinhanca de cada neuronio
+        eh um metodo super eficiente, baseado na implementacao do algoritmo da SOM
+        toolbox para matlab, feito pela Helsinky University
+        parametros:
+         - training_data: os dados no formato de sempre (m linhas sao dados, n colunas sao dimensoes)
+         - bmu: o bmu pra cada dado. tem formato (2, m) e a primeira row guarda os indices dos BMU
+
+        """
+
         #pega o indice do bmu
         row = bmu[0].astype(int)
         #cria uma coluna com valores de 0 ao numero de dados
@@ -450,6 +437,10 @@ class SOM(object):
         return clf.predict(data)
 
     def predict_by(self, data, target, k=5, wt='distance'):
+        """
+        Funcao nao usada nos procedimentos do trabalho
+        """
+
         # here it is assumed that target is the last column in the codebook
         # and data has dim-1 columns
         dim = self.codebook.matrix.shape[1]
@@ -481,33 +472,36 @@ class SOM(object):
 
     def predict(self, x_test, k=5, wt='distance'):
         """
-        Similar to SKlearn we assume that we have X_tr, Y_tr and X_test. Here
-        it is assumed that target is the last column in the codebook and data
-        has dim-1 columns
-
-        :param x_test: input vector
-        :param k: number of neighbors to use
-        :param wt: method to use for the weights
-            (more detail in KNeighborsRegressor docs)
-        :returns: predicted values for the input data
+        params:
+            - x_test: vetor de entrada
+            - k: o numero de vizinhos pra usar (vamos usar sempre 5, que eh o padrao sugerido pelo sklearn)
+            - wt: metodo pra usar nos pesos (vamos usar sempre distancia): eh um parametro passado
+            para o metodo KNeighborsRegressor, do sklearn
         """
+        #o alvo eh a ultima coluna do codebook
         target = self.data_raw.shape[1]-1
+        #pega os dados
         x_train = self.codebook.matrix[:, :target]
         y_train = self.codebook.matrix[:, target]
+        #funcao KNeighborsRegressor faz uma regressao baseada nos vizinhos
         clf = neighbors.KNeighborsRegressor(k, weights=wt)
+        #faz o fit do x_train e do y_train com a regressao dos vizinhos
         clf.fit(x_train, y_train)
 
-        # The codebook values are all normalized
-        # we can normalize the input data based on mean and std of
-        # original data
+        #pega os dados originais e os normaliza
         x_test = self._normalizer.normalize_by(
             self.data_raw[:, :target], x_test)
+        #passa os dados na funcao fit construida acima
         predicted_values = clf.predict(x_test)
 
+        #desfaz a normalizacao e retorna
         return self._normalizer.denormalize_by(
             self.data_raw[:, target], predicted_values)
 
     def find_k_nodes(self, data, k=5):
+        """
+        Funcao nao utilizada durante os procedimentos do trabalho
+        """
         from sklearn.neighbors import NearestNeighbors
         # we find the k most similar nodes to the input vector
         neighbor = NearestNeighbors(n_neighbors=k)
@@ -521,12 +515,10 @@ class SOM(object):
 
     def bmu_ind_to_xy(self, bmu_ind):
         """
-        Translates a best matching unit index to the corresponding
-        matrix x,y coordinates.
+        Transforma um BMU em coordenadas x e y, para verificacao durante o calculo do erro topografico
 
-        :param bmu_ind: node index of the best matching unit
-            (number of node from top left node)
-        :returns: corresponding (x,y) coordinate
+        params:
+            - bmu_ind: o indice do BMU
         """
         rows = self.codebook.mapsize[0]
         cols = self.codebook.mapsize[1]
@@ -541,6 +533,11 @@ class SOM(object):
         return out.astype(int)
 
     def cluster(self, n_clusters=8):
+        """
+        Funcao que retorna o Kmeans, partindo dos dados e do total de k
+        Utilizada apenas para gerar as visualizacoes finais, e por isso nao explicada nem usada em outras partes
+        do trabalho
+        """
         import sklearn.cluster as clust
         cl_labels = clust.KMeans(n_clusters=n_clusters).fit_predict(
             self._normalizer.denormalize_by(self.data_raw,
@@ -549,6 +546,10 @@ class SOM(object):
         return cl_labels
 
     def predict_probability(self, data, target, k=5):
+        """
+        Funcao nao utilizada nenhuma vez para os procedimentos do trabalho
+        """
+
         """
         Predicts probability of the input data to be target
 
@@ -603,6 +604,10 @@ class SOM(object):
         return np.concatenate((pos_prob, neg_prob), axis=1)
 
     def node_activation(self, data, target=None, wt='distance'):
+        """
+        Funcao nao utilizada nenhuma vez nos procedimentos do trabalho
+        """
+
         weights, ind = None, None
 
         if not target:
@@ -623,6 +628,10 @@ class SOM(object):
         return weights, ind
 
     def calculate_topographic_error(self):
+        """
+        Calcula o erro topografico
+        """
+        #analisa se os dois primeiros bmus para cada dado sao adjacentes no espaco de saida e retornam 0 se sim e 1 se nao
         bmus1 = self.find_bmu(self.data_raw, njb=1, nth=1)
         bmus2 = self.find_bmu(self.data_raw, njb=1, nth=2)
         bmus_gap = np.abs((self.bmu_ind_to_xy(np.array(bmus1[0]))[:, 0:2] - self.bmu_ind_to_xy(np.array(bmus2[0]))[:, 0:2]).sum(axis=1))
@@ -630,9 +639,7 @@ class SOM(object):
 
     def calculate_map_size(self, lattice):
         """
-        Calculates the optimal map size given a dataset using eigenvalues and eigenvectors. Matlab ported
-        :lattice: 'rect' or 'hex'
-        :return: map sizes
+        Funcao que calcula o mapsize ideal, que nao utilizamos para o trabalho.
         """
         D = self.data_raw.copy()
         dlen = D.shape[0]
@@ -667,29 +674,23 @@ class SOM(object):
         return [int(size1), int(size2)]
 
 
-# Since joblib.delayed uses Pickle, this method needs to be a top level
-# method in order to be pickled
-# Joblib is working on adding support for cloudpickle or dill which will allow
-# class methods to be pickled
-# when that that comes out we can move this to SOM class
 def _chunk_based_bmu_find(input_matrix, codebook, y2, nth=1):
     """
-    Finds the corresponding bmus to the input matrix.
-
-    :param input_matrix: a matrix of input data, representing input vector as
-                         rows, and vectors features/dimention as cols
-                         when parallelizing the search, the input_matrix can be
-                         a sub matrix from the bigger matrix
-    :param codebook: matrix of weights to be used for the bmu search
-    :param y2: <not sure>
+    Encontra os BMUs dada uma matriz
+    params:
+        - input_matrix: a matriz com os dados de entrada, onde cada linha indica um dado
+        e cada coluna uma dimensao
+        - codebook: a matriz de pesos que eh utilizada durante a busca pelo bmu
+        - y2: a distancia euclidiana entre os pesos
     """
+    #dlen eh a quantidade de dimensoes
     dlen = input_matrix.shape[0]
+    #numero de pesos
     nnodes = codebook.shape[0]
+    #o bmu eh inicializado como uma matriz bidimensional de tamanho dlen
     bmu = np.empty((dlen, 2))
 
-    # It seems that small batches for large dlen is really faster:
-    # that is because of ddata in loops and n_jobs. for large data it slows
-    # down due to memory needs in parallel
+    #fragmenta as dimensoes caso o numero seja muito alto
     blen = min(50, dlen)
     i0 = 0
 
@@ -698,8 +699,10 @@ def _chunk_based_bmu_find(input_matrix, codebook, y2, nth=1):
         high = min(dlen, i0+blen)
         i0 = i0+blen
         ddata = input_matrix[low:high+1]
+        #d eh uma matriz de multiplicacao dos pesos pelos dados
         d = np.dot(codebook, ddata.T)
         d *= -2
+        #que se transforma em um vetor
         d += y2.reshape(nnodes, 1)
         bmu[low:high+1, 0] = np.argpartition(d, nth, axis=0)[nth-1]
         bmu[low:high+1, 1] = np.partition(d, nth, axis=0)[nth-1]

@@ -24,6 +24,7 @@ class GaussianNeighborhood(object):
 
     @staticmethod
     def calculate(distance_matrix, radius, dim):
+        #calcula a vizinhanca a partir do radius definido
         return np.exp(-1.0*distance_matrix/(2.0*radius**2)).reshape(dim, dim)
 
     def __call__(self, *args, **kwargs):
@@ -31,7 +32,7 @@ class GaussianNeighborhood(object):
 
 
 class BubbleNeighborhood(object):
-
+    #nao utilizada durante os procedimentos do trabalho
     name = 'bubble'
 
     @staticmethod
