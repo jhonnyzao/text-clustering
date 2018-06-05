@@ -61,8 +61,11 @@ else:
 	dados = eval('pp.representacao_%s(dicionario, tokens)' % representacao)
 	logging.info('Quantidade de palavras antes da remocao das irrelevantes: %d.' % len(dados[0]))
 	
-	dados = pp.remove_palavras_irrelevantes(dados, corpora, representacao)
+	dados, dicionario = pp.remove_palavras_irrelevantes(dados, corpora, representacao, dicionario)
 	logging.info('Quantidade de palavras depois da remocao das irrelevantes: %d.' % len(dados[0]))
+        print(dicionario)
+        exit()
+
 
 
 
@@ -112,6 +115,22 @@ else:
 total_dados_por_grupo = []
 for i, grupo in enumerate(dados_por_grupo):
 	total_dados_por_grupo.append(len(grupo))
+
+total_palavras_por_grupo = []
+
+for grupo in dados_por_grupo:
+    palavras_grupo = []
+    for texto in grupo:
+        palavras_texto = []
+        for palavra_index in dados[texto]:
+            for i in range(palavra_inde
+            palavras_texto.append(palavra)
+        palavras_grupo.append(palavras_texto)
+    total_palavras_por_grupo.append(palavras_grupo)
+
+print(total_palavras_por_grupo)
+exit()
+
 
 logging.info('Centroides finais:')
 logging.info(centroides_finais)
