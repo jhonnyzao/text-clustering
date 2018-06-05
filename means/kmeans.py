@@ -15,7 +15,7 @@ class Kmeans:
 
 	def k_means(self, dados, centroides, total_k, tipo_distancia):
 		total_k = int(total_k)
-		iteracoes_maximas = 1000
+		iteracoes_maximas = 5000
 		grupos = defaultdict(dict)
 		grupos_ultima_iteracao = defaultdict(dict)
 
@@ -24,7 +24,7 @@ class Kmeans:
 
 		self.logging.info('Inicializando iteracao 0 do kmeans')
 		#duas condicoes de parada
-		while (iteracao_atual <= iteracoes_maximas or not convergiu):
+		while iteracao_atual < iteracoes_maximas and not convergiu:
 			matriz_distancias = self.obtem_matriz_distancias(centroides, dados, tipo_distancia)
 
 			#variavel que guarda ultimo estado de grupos para analise de convergencia
@@ -203,7 +203,6 @@ class Kmeans:
 			soma_xy += centroide[i] * dado[i]
 
 		distancia = soma_xy/(soma_x * soma_y)**0.5
-		distancia = round(distancia, 2)
 
 		return distancia
 
