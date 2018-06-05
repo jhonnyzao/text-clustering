@@ -165,7 +165,7 @@ class View2DPacked(MapView):
 
         plt.subplots_adjust(hspace=h, wspace=w)
 
-        nome_imagem = '../../imagens/mapview/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.png'
+        nome_imagem = 'imagens/mapview/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.png'
         plt.savefig(nome_imagem)
         
         

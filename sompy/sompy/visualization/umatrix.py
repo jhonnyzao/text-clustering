@@ -92,6 +92,6 @@ class UMatrixView(MatplotView):
                          coord[:, 0][sel_point[:, 0]], '.r')
                 sel_points.append(sel_point[:, 0])
 
-        nome_imagem = '../../imagens/umatrix/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.png'
+        nome_imagem = 'imagens/umatrix/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.png'
         plt.savefig(nome_imagem)
         return sel_points, umat
