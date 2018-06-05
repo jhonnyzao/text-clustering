@@ -16,6 +16,8 @@ class Kmeans:
 	def k_means(self, dados, centroides, total_k, tipo_distancia):
 		total_k = int(total_k)
 		iteracoes_maximas = 5000
+		#grupos é um vetor cujos indices indicam os indices dos textos, e valores indicam a quais grupos
+		#esses textos pertencem
 		grupos = defaultdict(dict)
 		grupos_ultima_iteracao = defaultdict(dict)
 

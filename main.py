@@ -63,8 +63,8 @@ else:
 	
 	dados, dicionario = pp.remove_palavras_irrelevantes(dados, corpora, representacao, dicionario)
 	logging.info('Quantidade de palavras depois da remocao das irrelevantes: %d.' % len(dados[0]))
-        print(dicionario)
-        exit()
+	print(dicionario)
+	exit()
 
 
 

@@ -1,4 +1,0 @@
-22:20:53,612 root INFO Iniciando execucao do kmeans, com 10 clusters, usando distancia similaridade_cosseno e dados em representacao binaria.
-22:20:53,701 root INFO Corpora ja pre processado antes. Numero de dimensoes: 89.
-22:20:53,701 root INFO Inicializando centroides sobre_dados.
-22:20:53,701 root INFO Inicializando iteracao 0 do kmeans

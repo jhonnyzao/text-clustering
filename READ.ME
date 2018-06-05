@@ -1,0 +1,34 @@
+Requisitos:
+
+Para executar o código, é necessário Python em versão 3.x.
+Os seguintes pacotes são necessários:
+	- numpy 
+	- nltk
+
+Caso a biblioteca de stop words em inglês nunca tenha sido baixada no ambiente em que o código será executado, executar o arquivo submetido na seção "outros códigos" chamado 'stopwords_en.py', através do comando:
+
+python3 stopwords_en.py
+
+Todos esses pacotes podem ser instalados através do gerenciador pacotes pip3 (gerenciador de dependências para o Phyton3). Com o pip3 instalado, basta executar o comando "pip3 install <nome_do_pacote>", como por exemplo:
+
+pip3 install numpy
+
+O mesmo pode ser executado tanto em Windows quanto em Linux (distribuições Debian). Lembrando que as distribuições Linux possuem Python na versão 2 instaladas por padrão, o que faz com que seja necessário o download da versão 3. 
+
+Para executar o código, basta executar, com o Python, o arquivo main.py se atentando aos seguintes parâmetros (e respeitando suas ordens):
+
+0: Nome do arquivo. Valores possíveis: ['main.py']
+1: Método que deseja executar. Valores possíveis: ['kmeans', 'kmeans++', 'xmeans']
+2: Número de k, onde k indica o total de clusters. Valores possíveis: Qualquer número inteiro. Recomenda-se o valor 2 para o método xmeans.
+3: Método de cálculo de distância que deseja utilizar. Valores possíveis: ['euclidiana', 'similaridade_cosseno']
+4: Modo de representação dos textos em matrizes. Valores possíveis: ['binaria', 'tf', 'tf-idf']
+5: Corpora escolhido. Valores possíveis: ['bbcsports', 'newsgroup20']
+6: Método de inicialização de centróides desejado. Valores possíveis: ['aleatoriamente', 'sobre_dados']
+
+Desta forma, um exemplo de comando possível é:
+
+python3 main.py kmeans 8 euclidiana tf bbcsports sobre_dados
+
+O algoritmo salva seus logs na pasta logs.
+
+Dentro da estrutura de arquivos partindo da raiz do projeto, existe uma pasta chamada "textos", que está vazia. Os corpora precisam ser carregados nelas em seus formatos originais respeitando os recortes descritos no relatório (se houver) caso haja a necessidade de refazer o pre processamento.
