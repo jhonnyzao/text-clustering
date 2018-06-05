@@ -9,12 +9,7 @@ import sompy
 import os,sys,inspect
 import logging
 from datetime import datetime
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-
-from means import pre_processamento
+from pre_processamento import pre_processamento
 
 nome_log = 'logs/som-' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.txt'
 logging.basicConfig(filename=nome_log,
@@ -41,7 +36,7 @@ logging.info("Iniciando exeucao do SOM")
 
 mapsize = [int(mapsize_x), int(mapsize_y)]
 
-resgata de arquivo caso o corpora ja tenha sido pre processado antes
+#resgata de arquivo caso o corpora ja tenha sido pre processado antes
 nome_arquivo = 'textos_pre_processados/%s-%s.txt' % (corpora, representacao)
 try:
 	carrega_texto_processado = np.loadtxt(nome_arquivo)
@@ -75,7 +70,7 @@ print('Erro topográfico:')
 print(topographic_error)
 
 v = sompy.mapview.View2DPacked(2, 2, 'BBCSport',text_size=8)  
-cl = som.cluster(n_clusters=8)
+cl = som.cluster(n_clusters=15)
 getattr(som, 'cluster_labels')
 
 v.show(som, what='cluster')

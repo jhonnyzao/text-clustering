@@ -1,5 +1,6 @@
 import matplotlib
 from .view import MatplotView
+from datetime import datetime
 from matplotlib import pyplot as plt
 import numpy as np
 #import ipdb
@@ -164,7 +165,8 @@ class View2DPacked(MapView):
 
         plt.subplots_adjust(hspace=h, wspace=w)
 
-        plt.savefig('som_corpora.png')
+        nome_imagem = '../../imagens/mapview/' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.png'
+        plt.savefig(nome_imagem)
         
         
 class View1D(MapView):

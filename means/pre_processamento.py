@@ -17,6 +17,7 @@ class PreProcessamento:
     def gera_dicionario(self, tokens):
         dicionario = []
 
+        #percorre todos os tokens gerados pelo tokenizer e monta um dicionario de palavras unicas
         for doc in tokens:
             for palavra in doc:
                 if palavra not in dicionario:
@@ -27,8 +28,11 @@ class PreProcessamento:
 
     def representacao_binaria(self, dicionario, tokens):
         tamanho = (len(tokens), len(dicionario))
+        #inicia uma matriz de zeros m x n onde m é o numero de textos e n o numero de palavras
         matriz = np.zeros(tamanho)
 
+        #com o dicionario pronto, percorre todos os textos e coloca 1 nas colunas cujas palavras
+        #aparecem nos textos
         for i, texto in enumerate(tokens):
             for j, palavra in enumerate(texto):
                 if palavra in dicionario:
@@ -39,8 +43,12 @@ class PreProcessamento:
 
     def representacao_tf(self, dicionario, tokens):
         tamanho = (len(tokens), len(dicionario))
+        #inicia uma matriz de zeros m x n onde m é o numero de textos e n o numero de palavras
         matriz = np.zeros(tamanho)
 
+        #com o dicionario pronto, percorre todos os textos e soma 1 nas colunas cujas palavras
+        #aparecem nos textos. segue a mesma linha da representacao binaria, mas o resultado mostra
+        #quantas vezes a palavra aparece na matriz   
         for i, texto in enumerate(tokens):
             for j, palavra in enumerate(texto):
                 if palavra in dicionario:
@@ -49,15 +57,20 @@ class PreProcessamento:
         return matriz
 
 
-    def term_frequency(self, dicionario, tokens):
+    def tf(self, dicionario, tokens):
         tamanho = (len(tokens), len(dicionario))
+        #inicia uma matriz de zeros m x n onde m é o numero de textos e n o numero de palavras
         matriz = np.zeros(tamanho)
 
+        #monta uma matriz com o numero inteiro de vezes que cada palavra aparece em cada texto
         for i, texto in enumerate(tokens):
             for j, palavra in enumerate(texto):
                 if palavra in dicionario:
                     matriz[i][dicionario.index(palavra)] += 1
 
+        #percorre entao essa matriz atualizando seu valor final de forma proporcional: se um texto
+        #tem 100 palavras e a palavra da coluna 0 aparece um total de 4 vezes, sua frequencia eh de 
+        #4/100 = 0.25
         for i, m in enumerate(matriz):
             for j, linha in enumerate(m):
                 matriz[i][j] = matriz[i][j]/len(tokens[i])
@@ -69,20 +82,26 @@ class PreProcessamento:
         cont = 0
         qtd_docs = len(tokens)
 
+        #se num conjunto de texto de 1000 textos uma palavra aparece em 20 deles, sua frequencia inversa
+        #eh de log(1000/20)
         for doc in tokens:
             if palavra in doc:
                 cont += 1
+
         return np.log(qtd_docs/cont)
 
 
     def representacao_tf_idf(self, dicionario, tokens):
         tamanho = (len(tokens), len(dicionario))
+        #inicia uma matriz de zeros m x n onde m é o numero de textos e n o numero de palavras
         matriz = np.zeros(tamanho)
-        matriz_tf = self.term_frequency(dicionario, tokens)
+        matriz_tf = self.tf(dicionario, tokens)
 
+        #percorre entao todos os tokens
         for i, texto in enumerate(tokens):
             for j, palavra in enumerate(texto):
                 if palavra in dicionario:
+                    #e atualiza a estrutura a ser retornada com o valor de seu tf * o do seu idf
                     matriz[i][dicionario.index(palavra)] = matriz_tf[i][dicionario.index(palavra)] * self.idf(palavra, tokens)
 
         return matriz
@@ -92,6 +111,7 @@ class PreProcessamento:
         textos = {}
         texto_index = 0
 
+        #funcao auxiliar para saltar as linhas de cabecalho do corpus
         def consume(iterator, n): collections.deque(itertools.islice(iterator, n))
 
         with open('textos/newsgroup20/newsgroup20.txt', 'r') as arquivo:

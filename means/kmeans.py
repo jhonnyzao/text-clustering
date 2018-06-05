@@ -140,6 +140,7 @@ class Kmeans:
 
 	def indice_silhouette(self, dados, grupos, metodo_distancia):
 		silhouettes_cada_ponto = []
+
 		for i, dado in enumerate(dados):
 			valores_mesmo_cluster = []
 			valores_cluster_diferente = []
@@ -173,8 +174,11 @@ class Kmeans:
 			silhouette = (b - a)/max(a, b)
 			silhouette = round(silhouette, 2)
 
+			#guarda o silhouette do dado da vez em um array que vai guarda o silhouette de cada ponto
 			silhouettes_cada_ponto.append(silhouette)
 
+		#consideramos que o silhouette total de um agrupamento se da pela media do silhouette
+		#de todos seus dados depois do agrupamento
 		silhouette_total = np.average(silhouettes_cada_ponto)
 
 		return silhouette_total
@@ -256,7 +260,7 @@ class Kmeans:
 		k = int(k)
 		#comeca com um nro baixo de centroides e os inicializa com kmeans++ para agilizar o comeco
 		k_inicial = k
-		centroides_iniciais = self.inicializa_k_means_mais_mais(dados.copy(), k_inicial, tipo_distancia)
+		centroides_iniciais = self.inicializa_centroides_sobre_dados(dados.copy(), k_inicial)
 		self.logging.info("Iniciando xmeans com %d centroides" % k)
 		grupos, centroides_k_means = self.k_means(dados, centroides_iniciais, k_inicial, tipo_distancia)
 
@@ -277,6 +281,7 @@ class Kmeans:
 		for centroide in centroides_k_means:
 			centroides.append(list((False, centroide)))
 
+		#variavel de controle que indica convergencia
 		todos_os_centroides_convergidos = False
 		centroides_a_apagar = list()
 
